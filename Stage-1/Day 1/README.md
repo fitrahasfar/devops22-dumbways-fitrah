@@ -12,3 +12,11 @@ E. Select according to the version of Ubuntu you want and after it is finished t
 ![image](https://github.com/user-attachments/assets/cc0e2871-ee5f-43e8-8ee3-d1555cf15162)
 
 ## 3. Install Apache2 Web Server to Virtual Machine?
+A. Open terminal and enter the command sudo apt-get update
+![image](https://github.com/user-attachments/assets/3a269944-83b2-4aa9-9160-e5a938dba7a3)
+B. To install apache2 enter the command sudo apt-get install -y apache2
+![image](https://github.com/user-attachments/assets/0e0b1d3c-b6e2-4fb1-af2d-d6d20e2b57a9)
+C. To see apache2 running enter the command systemctl status apache2
+![image](https://github.com/user-attachments/assets/7e8baedd-7aa0-490d-967c-16ba45755ce9)
+D. See apache2 is running by enter command curl localhost as shown in the picture
+![image](https://github.com/user-attachments/assets/b83ab36f-5fe7-4073-9f38-2ecf8524d4b8)
