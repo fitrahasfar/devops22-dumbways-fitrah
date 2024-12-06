@@ -53,15 +53,21 @@ M. whoami > Displays the name of the currently active user.
 
 N. adduser/useradd > Add new user.
 
-user![image](https://github.com/user-attachments/assets/67849b17-f7ef-475c-9ed7-9994449fef9f)
+![image](https://github.com/user-attachments/assets/67849b17-f7ef-475c-9ed7-9994449fef9f)
 
 
 ## 2. Difference between Private IP and Public IP, as well as dynamic ip and static ip
 A. Private IP
+
 Private IP is an IP address used for internal networks, such as home or office networks, that cannot be accessed directly from the internet. These IP addresses cannot be accessed from outside the local network and are typically used by devices connected to routers or switches within that network.
+
 B. Public IP
+
 A public IP address is a unique numerical label assigned to each device connected to the Internet. This IP allows devices around the world to be identified and communicate with each other. 
+
 C. Dynamic IP
+
 A dynamic IP is an IP address that is automatically assigned by a DHCP (Dynamic Host Configuration Protocol) server and can change each time the device connects to the network.
+
 D. Static IP
 Static IP is an IP address that is manually assigned to a device and remains unchanged as long as the device is connected to the network.
