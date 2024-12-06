@@ -70,4 +70,5 @@ C. Dynamic IP
 A dynamic IP is an IP address that is automatically assigned by a DHCP (Dynamic Host Configuration Protocol) server and can change each time the device connects to the network.
 
 D. Static IP
+
 Static IP is an IP address that is manually assigned to a device and remains unchanged as long as the device is connected to the network.
