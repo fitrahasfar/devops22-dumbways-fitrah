@@ -9,3 +9,7 @@ D. Commit changes
 E. Push to repository
 
 ## 3. Git command documentation
+A. 
+
+
+## 4. Study case
