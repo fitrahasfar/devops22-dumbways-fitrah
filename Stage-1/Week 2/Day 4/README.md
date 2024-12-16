@@ -117,3 +117,5 @@ B. Activate ufw as instructed below.
 C. On server B, create a firewall that only allows server A to access the webserver.
 
 
+F. TCP and UDP differences
+TCP (Transmission Control Protocol) is used in applications that require guaranteed and sequential data transmission, whereas, UDP (User Datagram Protocol) is a disconnected protocol and does not guarantee reliability. UDP is faster than TCP because it does not check or reset lost data.
