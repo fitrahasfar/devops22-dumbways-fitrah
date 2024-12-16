@@ -1,15 +1,23 @@
 1. Shortcuts Documentation of Nano Text Editor
    A. Ctrl + o > Saves the file being edited.
+   
    B. Ctrl + x > Exit Nano. If there are unsaved changes, Nano will ask if you want to save the changes.
+   
    C. Ctrl + w > Search for text in a file.
+   
    D. Ctrl + l > Deletes the entire row where the cursor was.
+   
    E. Ctrl + u > Insert deleted text using Ctrl + k.
+   
    F. Ctrl + g > Displays help for Nano commands.
+   
    G. Ctrl + c > Display the position of the cursor in the file (row and column).
+   
    I. Ctrl + a > Move to the beginning of the row.
+   
    J. Ctrl + e > Move to the end of a line.
 
-2. Text Manipulation Documentation
+3. Text Manipulation Documentation
    A. sed 's/old_text/new_text/g' name_file > Searching and Replacing Text
 
    ![image](https://github.com/user-attachments/assets/252dd4d8-be11-485d-9a93-57d4fdcfe69d)
@@ -33,7 +41,7 @@
    F. sed '3aadd new row' file.txt > add text after the 3rd line
    ![image](https://github.com/user-attachments/assets/a35131fd-8727-4e1b-a913-40cb9e1e90f3)
 
-3. Study case
+4. Study case
    You work in a team of data analysts for a website that displays Formula 1 drivers' data. The drivers' data is stored in an md text file called formula-one-drivers.md, with the following format:
    ID,Name,Team,Position,Salary
    001,Lewis Hamilton,Mercedes,1,70000000
@@ -55,7 +63,7 @@
 
    ![image](https://github.com/user-attachments/assets/2473591a-c5cc-40e9-966c-83e80ccb1bbf)
 
-4. Bash Script for Web Server Installation
+5. Bash Script for Web Server Installation
    A. create a new file named install-webserver.sh and fill in the code according to the image
    
    ![image](https://github.com/user-attachments/assets/2bb717fd-dfef-4a0d-95ac-1ede4dbba518)
@@ -72,4 +80,4 @@
 
    ![image](https://github.com/user-attachments/assets/9a89adae-1e4e-479d-8c07-ddf1e949b4c2)
 
-5. Study case    
+6. Study case    
