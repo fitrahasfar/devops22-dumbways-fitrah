@@ -116,6 +116,20 @@ B. Activate ufw as instructed below.
 
 C. On server B, create a firewall that only allows server A to access the webserver.
 
+![image](https://github.com/user-attachments/assets/275eb7f7-c9d5-44f6-b26e-abba861d2e08)
+
+![image](https://github.com/user-attachments/assets/7c060e55-aaab-4e71-8dd9-3d83a9c4a018)
+
+D. Block TCP and UDP ports
+
+![image](https://github.com/user-attachments/assets/bf87ca30-cebe-43d3-baa3-c7d1f5027226)
+
+E. After all is done, test server A can access server B's webserver while server B cannot access server A's webserver.
+
+![image](https://github.com/user-attachments/assets/7c060e55-aaab-4e71-8dd9-3d83a9c4a018)
+
+![image](https://github.com/user-attachments/assets/cf4705ba-e093-4caa-8588-f5be480e3ac6)
+
 
 F. TCP and UDP differences
 TCP (Transmission Control Protocol) is used in applications that require guaranteed and sequential data transmission, whereas, UDP (User Datagram Protocol) is a disconnected protocol and does not guarantee reliability. UDP is faster than TCP because it does not check or reset lost data.
