@@ -118,8 +118,6 @@ C. On server B, create a firewall that only allows server A to access the webser
 
 ![image](https://github.com/user-attachments/assets/275eb7f7-c9d5-44f6-b26e-abba861d2e08)
 
-![image](https://github.com/user-attachments/assets/7c060e55-aaab-4e71-8dd9-3d83a9c4a018)
-
 D. Block TCP and UDP ports
 
 ![image](https://github.com/user-attachments/assets/bf87ca30-cebe-43d3-baa3-c7d1f5027226)
