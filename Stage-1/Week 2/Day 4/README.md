@@ -43,15 +43,25 @@
 
 4. Study case
    You work in a team of data analysts for a website that displays Formula 1 drivers' data. The drivers' data is stored in an md text file called formula-one-drivers.md, with the following format:
+   
    ID,Name,Team,Position,Salary
+   
    001,Lewis Hamilton,Mercedes,1,70000000
+   
    002,Max Verstappen,Red Bull Racing,2,50000000
+   
    003,Sergio Perez,Red Bull Racing,3,25000000
+   
    004,Charles Leclerc,Ferrari,4,15000000
+   
    005,Lando Norris,Mclaren,5,10000000
+   
    006,Daniel Ricciardo,AlphaTauri,6,8000000
+   
    Your task is to do some text manipulation using the sed command in Linux. Here are some of the things you have to do.
+   
    - Replace the words ‘Red Bull Racing’ with ‘Red Bull Racing Honda’ in the Team column.
+  
    - Delete all rows containing drivers with more than 3 positions.
 
    Solution:
@@ -63,7 +73,7 @@
 
    ![image](https://github.com/user-attachments/assets/2473591a-c5cc-40e9-966c-83e80ccb1bbf)
 
-5. Bash Script for Web Server Installation
+6. Bash Script for Web Server Installation
    A. create a new file named install-webserver.sh and fill in the code according to the image
    
    ![image](https://github.com/user-attachments/assets/2bb717fd-dfef-4a0d-95ac-1ede4dbba518)
@@ -80,4 +90,4 @@
 
    ![image](https://github.com/user-attachments/assets/9a89adae-1e4e-479d-8c07-ddf1e949b4c2)
 
-6. Study case    
+7. Study case    
