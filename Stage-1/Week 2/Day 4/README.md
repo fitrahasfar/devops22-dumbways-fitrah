@@ -17,7 +17,7 @@
    
    J. Ctrl + e > Move to the end of a line.
 
-3. Text Manipulation Documentation
+2. Text Manipulation Documentation
    A. sed 's/old_text/new_text/g' name_file > Searching and Replacing Text
 
    ![image](https://github.com/user-attachments/assets/252dd4d8-be11-485d-9a93-57d4fdcfe69d)
@@ -41,7 +41,7 @@
    F. sed '3aadd new row' file.txt > add text after the 3rd line
    ![image](https://github.com/user-attachments/assets/a35131fd-8727-4e1b-a913-40cb9e1e90f3)
 
-4. Study case
+3. Study case
    You work in a team of data analysts for a website that displays Formula 1 drivers' data. The drivers' data is stored in an md text file called formula-one-drivers.md, with the following format:
    
    ID,Name,Team,Position,Salary
@@ -73,7 +73,7 @@
 
    ![image](https://github.com/user-attachments/assets/2473591a-c5cc-40e9-966c-83e80ccb1bbf)
 
-6. Bash Script for Web Server Installation
+4. Bash Script for Web Server Installation
    A. create a new file named install-webserver.sh and fill in the code according to the image
    
    ![image](https://github.com/user-attachments/assets/2bb717fd-dfef-4a0d-95ac-1ede4dbba518)
@@ -90,4 +90,30 @@
 
    ![image](https://github.com/user-attachments/assets/9a89adae-1e4e-479d-8c07-ddf1e949b4c2)
 
-7. Study case    
+5. Study case
+Implement Firewall on your Linux server.
+
+- Create 2 Virtual Machines.
+      
+- The study case is so that only server A can only access the WebServer on server B.
+
+- Look for ways that UFW can block or allow specific network protocols such as TCP and UDP.
+
+- Explain the difference between TCP and UDP network protocols.
+
+Solution:
+A. Make sure that both vm (Virtual Machine) already have ufw.
+
+![image](https://github.com/user-attachments/assets/405a59d8-9220-4621-8258-cf4007b8380f)
+
+![image](https://github.com/user-attachments/assets/4f053d24-1fba-4143-9608-925cd3671df0)
+
+B. Activate ufw as instructed below.
+
+![image](https://github.com/user-attachments/assets/a9c5a741-4df7-4b99-aa3e-f7ceeed1df08)
+
+![image](https://github.com/user-attachments/assets/51cf53b2-5098-42e6-8c7e-dde686c503e9)
+
+C. On server B, create a firewall that only allows server A to access the webserver.
+
+
