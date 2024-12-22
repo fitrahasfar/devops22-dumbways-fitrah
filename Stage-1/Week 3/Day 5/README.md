@@ -26,7 +26,7 @@ A. NodeJS
 
 - After creating a new directory create a file with the name simple-app-node.js
 
-![3](https://github.com/user-attachments/assets/28dbf5ac-003a-4e5b-8209-a731d0c23784)
+  ![3](https://github.com/user-attachments/assets/28dbf5ac-003a-4e5b-8209-a731d0c23784)
 
 - Install express, npm install, and npm init -y to ensure nodejs is ready to use
 
@@ -62,8 +62,6 @@ B. Golang
 
   ![10](https://github.com/user-attachments/assets/621d4b42-3a30-471e-ac60-e7fb08a25849)
 
-- Once golang is running check on the other vm to make sure it is running correctly.
-
 C. Python
 
 - Install python3 and pip3
@@ -98,23 +96,23 @@ C. Python
 
 A. After cloning repository github on the url github above and move the directory to the clone repository
 
-![19](https://github.com/user-attachments/assets/084fce34-60c8-410c-9e34-4082ce7975ae)
+  ![19](https://github.com/user-attachments/assets/084fce34-60c8-410c-9e34-4082ce7975ae)
 
 B. Install nvm 14 and make sure to use nodejs version 14 
 
-![20](https://github.com/user-attachments/assets/50f5db8f-01fc-47c4-9554-da9ec19297f6)
+  ![20](https://github.com/user-attachments/assets/50f5db8f-01fc-47c4-9554-da9ec19297f6)
 
 C. Do npm install
 
-![21](https://github.com/user-attachments/assets/78d3a6a9-96aa-4cb5-9ca8-e04c0a9f2780)
+  ![21](https://github.com/user-attachments/assets/78d3a6a9-96aa-4cb5-9ca8-e04c0a9f2780)
 
 D. Run with the "npm start" command then the results will be as shown below
 
-![22](https://github.com/user-attachments/assets/5058cec6-40ea-413c-be0c-e504dd7538d5)
+  ![22](https://github.com/user-attachments/assets/5058cec6-40ea-413c-be0c-e504dd7538d5)
 
 E. Once dumbflix is running check on your browser to make sure it is running correctly
 
-![23](https://github.com/user-attachments/assets/12f739d4-9eba-49dd-8fa2-50cd7e19b1ba)
+  ![23](https://github.com/user-attachments/assets/12f739d4-9eba-49dd-8fa2-50cd7e19b1ba)
 
 ## 4. Implement the use of PM2 so that applications can run in the background (simple-app-node, simple-app-python, dumbflix)
 
@@ -122,15 +120,15 @@ A. Simple-app-node
 
 - Install pm2 on your vm
 
-![24 (nomor 4)](https://github.com/user-attachments/assets/51a4b07c-ed46-47a7-97e9-8270140ea3be)
+  ![24 (nomor 4)](https://github.com/user-attachments/assets/51a4b07c-ed46-47a7-97e9-8270140ea3be)
 
 - Move to directory nodejs and running following command below
 
-![25](https://github.com/user-attachments/assets/466d8456-2e08-41de-b835-66e9b0fe86f5)
+  ![25](https://github.com/user-attachments/assets/466d8456-2e08-41de-b835-66e9b0fe86f5)
 
 - Check your other vm for running your node use pm2
 
-![26](https://github.com/user-attachments/assets/db4adca0-7f8a-4822-ad76-c2a6b43b44d8)
+  ![26](https://github.com/user-attachments/assets/db4adca0-7f8a-4822-ad76-c2a6b43b44d8)
 
 - To stop nodejs running using pm2 then use the command below
 
