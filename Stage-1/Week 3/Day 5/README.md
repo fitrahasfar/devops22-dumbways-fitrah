@@ -38,7 +38,7 @@ A. NodeJS
 
 - Once nodejs is running check on the other vm to make sure it is running correctly.
 
-  [6](https://github.com/user-attachments/assets/6c9e9da4-c66c-4735-a810-e34310e9b533)
+  ![6](https://github.com/user-attachments/assets/69e7870d-0cac-4847-a0ec-a0118351d9df)
 
 B. Golang
 
