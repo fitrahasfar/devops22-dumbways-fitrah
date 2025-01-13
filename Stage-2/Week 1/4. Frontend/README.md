@@ -9,8 +9,6 @@ Tasks :
 
 1. Git clone your repository
 
-Repository: https://github.com/dumbwaysdev/dumbflix-frontend.git
-
 ![image](https://github.com/user-attachments/assets/d167f124-2453-471d-9a48-b34e6a922a11)
 
 2. Enter the directory cd dumbflix-frontend.
