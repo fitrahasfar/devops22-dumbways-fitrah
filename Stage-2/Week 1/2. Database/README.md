@@ -57,7 +57,8 @@
 
    ![11  (5_1  masuk ke dalam sudo nano -etc-mysql-mysql conf d-mysqld cnf dan tambahkan ip public di bind-address)](https://github.com/user-attachments/assets/bf1104dc-af7b-4dcf-a91f-ce2efffa26ce)
 
-3. Role Based
+2. Role Based
+   
    A. Login to mysql
 
    ![1  (A  Masuk ke mysql)](https://github.com/user-attachments/assets/b6931a13-8478-404d-bab6-859d39b78def)
@@ -96,7 +97,7 @@
 
    ![8  uji coba role guest](https://github.com/user-attachments/assets/525f2dd7-4999-4dd4-9eca-15e653d814bf)
 
-5. Remote User
+3. Remote User
 
    A. First create a new user, grant access, and apply the changes made.
 
