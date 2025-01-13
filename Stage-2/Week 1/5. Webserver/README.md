@@ -33,3 +33,13 @@ B. Back-End
 8.  Activate certbot to domain
 ![7  install certbot](https://github.com/user-attachments/assets/3c1ad934-ea6c-4598-b54e-81c79dabf237)
 
+C. Wildcard domain
+
+1. Enter the command wildcard, copy DNS TXT and value VALUE TXT
+
+![wildcard](https://github.com/user-attachments/assets/0438f70d-8b2d-4f9c-9b9a-c8c0455975db)
+
+2. Login cloudflare, choose type TXT, paste DNS TXT and VALUE from command wildcard
+
+![image](https://github.com/user-attachments/assets/fd0e7a0b-6520-46a7-85cf-76c6c986777b)
+
