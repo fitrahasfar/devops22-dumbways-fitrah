@@ -43,6 +43,28 @@ A. Back-End
    
 ![7  install certbot](https://github.com/user-attachments/assets/3c1ad934-ea6c-4598-b54e-81c79dabf237)
 
+B. Front-End
+
+1. Just like before, enter the apps folder and create a new file, namely fitrah.studentdumbways.my.id.
+
+![image](https://github.com/user-attachments/assets/045589e9-0e5d-48d7-8622-ec6325a22ac0)
+
+2. Enter the file and enter the webserver command and proxy pass pointing to the ip address of the dumbflix-frontend vm.
+
+![image](https://github.com/user-attachments/assets/657cfcd4-3412-493a-a90a-7d2a5d5c7de6)
+
+3. Check and restart nginx.
+
+![4  cek nginx dan restart](https://github.com/user-attachments/assets/5cb1703e-2fe4-42c5-acbd-1eec28354f6c)
+
+4. Log into cloudflare and add a record that is the ip address of the webserver and the sub domain used.
+
+![image](https://github.com/user-attachments/assets/322e298a-ea21-410d-8334-dafda2bfbe1e)
+
+5. Then create a browser and type in the sub-domain and the domain has been created.
+
+![image](https://github.com/user-attachments/assets/af96d905-ca1f-4f49-bf0f-3872f13a1c44)
+
 C. Wildcard domain
 
 1. Enter the command wildcard, copy DNS TXT and value VALUE TXT
