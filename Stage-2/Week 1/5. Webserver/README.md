@@ -1,6 +1,15 @@
-A. Front-End
+Tasks :
 
-B. Back-End
+-Install nginx
+- Create a reverse proxy and use a domain with your name ex:
+   - frontend: randal.studentdumbways.my.id
+      -ssl cloudflare can be Active / or want to use SSL certbot is also welcome
+   - backend: api.randal.studentdumbways.my.id
+      -For Certbot Installation there are many ways (one of them is like in class), or if you find other ways to install certbot or other tools used to generate ssl feel free to use yaa.
+      - Generate SSL for your reverse proxy.
+      - Chalange try to find how to implement Wildcard SSL
+  
+A. Back-End
 
 1. Install nginx
 
