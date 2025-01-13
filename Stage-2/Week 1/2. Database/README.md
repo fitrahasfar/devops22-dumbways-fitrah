@@ -1,4 +1,5 @@
 1. Deploy database MySQL
+   
    A. Install mysql-server
    
    ![1](https://github.com/user-attachments/assets/8dc6832a-0d65-45b8-933c-ea93c13050b6)
