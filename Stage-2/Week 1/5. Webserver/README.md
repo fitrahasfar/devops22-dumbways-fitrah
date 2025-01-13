@@ -31,6 +31,7 @@ B. Back-End
 ![7  install certbot](https://github.com/user-attachments/assets/a9d9ba1a-3da3-4f1b-a7c8-fd45cd83b936)
 
 8.  Activate certbot to domain
+   
 ![7  install certbot](https://github.com/user-attachments/assets/3c1ad934-ea6c-4598-b54e-81c79dabf237)
 
 C. Wildcard domain
