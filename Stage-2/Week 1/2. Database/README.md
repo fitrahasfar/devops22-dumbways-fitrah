@@ -55,7 +55,8 @@
 
    M. Restart mysql
 
-   ![11  (5_1  masuk ke dalam sudo nano -etc-mysql-mysql conf d-mysqld cnf dan tambahkan ip public di bind-address)](https://github.com/user-attachments/assets/bf1104dc-af7b-4dcf-a91f-ce2efffa26ce)
+   ![12  (5_2 restart mysql)](https://github.com/user-attachments/assets/2378ab2c-966f-4aa9-bc04-c0a2ba673565)
+
 
 2. Role Based
    
