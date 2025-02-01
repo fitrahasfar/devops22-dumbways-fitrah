@@ -1,0 +1,30 @@
+# Add new user
+- name: Create a new user
+  user:
+    name: newuser
+    password: "{{ 'password' | password_hash('sha512') }}"
+    groups: sudo
+    append: yes
+
+- name: Add SSH key for new user
+  authorized_key:
+    user: newuser
+    key: "{{ lookup('file', '/.ssh/') }}"
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+
+# Deploy Frontend
+- name: Pull frontend Docker image
+  docker_image:
+    name: "{{ frontend_image }}"
+    source: pull
+
+- name: Run frontend container
+  docker_container:
+    name: frontend
+    image: "{{ frontend_image }}"
+    ports:
+      - "3000:3000"
+    state: started

@@ -1,0 +1,7 @@
+- hosts: ansible
+  roles:
+    - common
+    - docker
+    - frontend
+    - reverse_proxy
+    - monitoring
