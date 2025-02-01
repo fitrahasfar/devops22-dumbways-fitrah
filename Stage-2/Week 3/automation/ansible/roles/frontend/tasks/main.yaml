@@ -1,12 +1,6 @@
-- name: Pull frontend Docker image
-  docker_image:
-    name: "{{ frontend_image }}"
-    source: pull
+- name: Pull latest frontend image
+  shell: docker pull mydockerhub/frontend-app:latest
 
-- name: Run frontend container
-  docker_container:
-    name: frontend
-    image: "{{ frontend_image }}"
-    ports:
-      - "3000:3000"
-    state: started
+- name: Deploy frontend container
+  shell: |
+    docker run -d --name frontend_container -p 80:80 mydockerhub/frontend-app:latest

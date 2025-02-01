@@ -1,39 +1,11 @@
----
-- name: Pull Prometheus image
-  docker_image:
-    name: "{{ prometheus_image }}"
-    source: pull
+- name: Deploy Prometheus
+  shell: |
+    docker run -d --name prometheus -p 9090:9090 prom/prometheus
 
-- name: Run Prometheus container
-  docker_container:
-    name: prometheus
-    image: "{{ prometheus_image }}"
-    ports:
-      - "9090:9090"
-    state: started
+- name: Deploy Node Exporter
+  shell: |
+    docker run -d --name node_exporter -p 9100:9100 prom/node-exporter
 
-- name: Pull Grafana image
-  docker_image:
-    name: "{{ grafana_image }}"
-    source: pull
-
-- name: Run Grafana container
-  docker_container:
-    name: grafana
-    image: "{{ grafana_image }}"
-    ports:
-      - "3030:3030"
-    state: started
-
-- name: Pull Node Exporter image
-  docker_image:
-    name: "{{ node_exporter_image }}"
-    source: pull
-
-- name: Run Node Exporter container
-  docker_container:
-    name: node_exporter
-    image: "{{ node_exporter_image }}"
-    ports:
-      - "9100:9100"
-    state: started
+- name: Deploy Grafana
+  shell: |
+    docker run -d --name grafana -p 3000:3000 grafana/grafana

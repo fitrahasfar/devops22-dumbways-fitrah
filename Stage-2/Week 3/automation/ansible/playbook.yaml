@@ -1,7 +1,8 @@
-- hosts: ansible
+- hosts: servers
+  become: yes
   roles:
-    - common
+    - user_setup
     - docker
     - frontend
-    - reverse_proxy
     - monitoring
+    - reverse_proxy
