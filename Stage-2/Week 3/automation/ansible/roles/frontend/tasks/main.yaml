@@ -1,0 +1,12 @@
+- name: Pull frontend Docker image
+  docker_image:
+    name: "{{ frontend_image }}"
+    source: pull
+
+- name: Run frontend container
+  docker_container:
+    name: frontend
+    image: "{{ frontend_image }}"
+    ports:
+      - "3000:3000"
+    state: started
