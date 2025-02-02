@@ -23,3 +23,15 @@
     name: nginx
     state: started
     enabled: yes
+
+- name: Reload Nginx untuk menerapkan perubahan
+  command: nginx -t
+  register: nginx_config_check
+  changed_when: nginx_config_check.rc != 0
+  failed_when: nginx_config_check.rc != 0
+
+- name: Restart Nginx jika konfigurasi valid
+  service:
+    name: nginx
+    state: restarted
+  when: nginx_config_check.rc == 0
