@@ -1,8 +1,10 @@
 - name: Pastikan Docker Compose terinstal dengan versi terbaru
-  shell: |
-    apt-get update && apt-get install -y docker-compose-plugin docker-compose
-  args:
-    warn: false
+  apt:
+    name: docker-compose
+    state: present
+    update_cache: yes
+
+
 - name: Pastikan Docker Compose terinstal
   apt:
     name: docker-compose
