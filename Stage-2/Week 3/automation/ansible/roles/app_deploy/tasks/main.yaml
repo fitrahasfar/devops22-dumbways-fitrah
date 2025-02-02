@@ -1,18 +1,28 @@
+---
 - name: Pastikan Docker Compose terinstal
   apt:
     name: docker-compose
     state: present
     update_cache: yes
 
+- name: Pastikan direktori aplikasi tersedia
+  file:
+    path: "/home/deploy/literature-frontend"
+    state: directory
+    owner: deploy
+    group: deploy
+    mode: '0755'
+
 - name: Clone repository frontend dari GitHub
+  become: yes
+  become_user: deploy
   git:
     repo: "https://github.com/dumbwaysdev/literature-frontend.git"
     dest: "/home/deploy/literature-frontend"
     version: main
     force: yes
-  become_user: deploy
 
-- name: Salin Dockerfile ke direktori frontend
+- name: Pastikan file Dockerfile memiliki izin yang benar
   template:
     src: Dockerfile.j2
     dest: "/home/deploy/literature-frontend/Dockerfile"
@@ -20,7 +30,7 @@
     group: deploy
     mode: '0644'
 
-- name: Salin docker-compose.yml ke direktori frontend
+- name: Pastikan file docker-compose.yml memiliki izin yang benar
   template:
     src: docker-compose.yml.j2
     dest: "/home/deploy/literature-frontend/docker-compose.yml"
@@ -28,8 +38,16 @@
     group: deploy
     mode: '0644'
 
+- name: Tambahkan user deploy ke grup docker (agar bisa menjalankan container tanpa sudo)
+  user:
+    name: deploy
+    groups: docker
+    append: yes
+
 - name: Bangun dan jalankan aplikasi frontend dengan Docker Compose
-  command: docker-compose up -d --build
+  become: yes
+  become_user: deploy
+  shell: |
+    docker-compose up -d --build
   args:
     chdir: /home/deploy/literature-frontend
-  become_user: deploy
