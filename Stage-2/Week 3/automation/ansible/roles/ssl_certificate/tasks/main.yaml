@@ -26,10 +26,10 @@
     dest: /root/cloudflare.ini
     mode: '0600'
 
-- name: Pastikan dependency Python Cloudflare terbaru
-  pip:
-    name: cloudflare
-    state: latest
+# - name: Pastikan dependency Python Cloudflare terbaru
+#   pip:
+#     name: cloudflare
+#     state: latest
 
 - name: Pastikan direktori sertifikat ada sebelum generate SSL
   file:
