@@ -3,13 +3,23 @@
   apt:
     name: nginx
     state: present
+    update_cache: yes
 
 - name: Copy konfigurasi Nginx untuk Reverse Proxy
   template:
     src: nginx.conf.j2
     dest: /etc/nginx/sites-available/default
+  notify: Restart Nginx
 
-- name: Restart Nginx
+- name: Aktifkan konfigurasi Nginx
+  file:
+    src: /etc/nginx/sites-available/default
+    dest: /etc/nginx/sites-enabled/default
+    state: link
+  notify: Restart Nginx
+
+- name: Pastikan Nginx berjalan
   service:
     name: nginx
-    state: restarted
+    state: started
+    enabled: yes
