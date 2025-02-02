@@ -1,5 +1,13 @@
 ---
-- name: Perbarui repositori dan paket sistem sebelum instalasi
+- name: Pastikan user deploy memiliki akses sudo tanpa password
+  become: yes
+  lineinfile:
+    path: /etc/sudoers.d/deploy
+    create: yes
+    line: "deploy ALL=(ALL) NOPASSWD: ALL"
+    validate: 'visudo -cf %s'
+
+- name: Perbarui daftar paket sebelum instalasi
   become: yes
   apt:
     update_cache: yes
@@ -37,18 +45,18 @@
   debug:
     var: nginx_service_name.stdout_lines
 
-- name: Salin konfigurasi Nginx untuk Reverse Proxy
+- name: Salin konfigurasi Nginx untuk Reverse Proxy Frontend
   become: yes
   template:
     src: templates/frontend.conf.j2
-    dest: /etc/nginx/sites-available/default
+    dest: /etc/nginx/sites-available/frontend
   notify: Restart Nginx
 
-- name: Aktifkan konfigurasi Nginx jika belum aktif
+- name: Aktifkan konfigurasi Reverse Proxy untuk Frontend
   become: yes
   file:
-    src: /etc/nginx/sites-available/default
-    dest: /etc/nginx/sites-enabled/default
+    src: /etc/nginx/sites-available/frontend
+    dest: /etc/nginx/sites-enabled/frontend
     state: link
   notify: Restart Nginx
 
