@@ -13,21 +13,26 @@
     group: deploy
     mode: '0755'
 
-- name: Clone repository frontend dari GitHub (jika belum ada)
+- name: Hapus direktori jika bukan repository Git yang valid
   become: yes
   shell: |
     if [ ! -d "/home/deploy/literature-frontend/.git" ]; then
-      sudo -u deploy git clone --branch main --single-branch https://github.com/dumbwaysdev/literature-frontend.git /home/deploy/literature-frontend
+      rm -rf /home/deploy/literature-frontend
     fi
   args:
     chdir: /home/deploy
   ignore_errors: yes
 
+- name: Clone repository frontend dari GitHub
+  become: yes
+  shell: sudo -u deploy git clone --branch main --single-branch https://github.com/dumbwaysdev/literature-frontend.git /home/deploy/literature-frontend
+  args:
+    chdir: /home/deploy
+  ignore_errors: no
+
 - name: Reset repository frontend ke versi terbaru
   become: yes
-  shell: |
-    sudo -u deploy git reset --hard
-    sudo -u deploy git pull origin main
+  shell: sudo -u deploy git reset --hard && sudo -u deploy git pull origin main
   args:
     chdir: /home/deploy/literature-frontend
   ignore_errors: yes
@@ -56,8 +61,7 @@
 
 - name: Pastikan user deploy memiliki akses ke Docker CLI
   become: yes
-  shell: |
-    sudo usermod -aG docker deploy
+  shell: sudo usermod -aG docker deploy
   ignore_errors: yes
 
 - name: Pastikan service Docker berjalan
@@ -68,14 +72,13 @@
 
 - name: Cek apakah Docker Compose dapat dijalankan
   become: yes
-  become_user: deploy
-  shell: docker compose version || docker-compose version
+  shell: |
+    docker compose version || docker-compose version
   register: docker_compose_check
   ignore_errors: yes
 
 - name: Gunakan perintah yang sesuai untuk menjalankan Docker Compose
   become: yes
-  become_user: deploy
   shell: |
     if command -v docker-compose &> /dev/null; then
       docker-compose up -d --build
