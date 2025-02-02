@@ -1,6 +1,6 @@
 - name: Copy file konfigurasi monitoring
   template:
-    src: monitoring-docker-compose.yml.j2
+    src: monitoring-compose.yml.j2
     dest: /home/deploy/monitoring/docker-compose.yml
     owner: deploy
     group: deploy
