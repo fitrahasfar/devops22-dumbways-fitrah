@@ -1,16 +1,19 @@
-- name: Install Nginx
+---
+- name: Install Nginx jika belum ada
   apt:
     name: nginx
     state: present
     update_cache: yes
 
 - name: Pastikan Nginx service tersedia dan berjalan
+  become: yes
   shell: |
     systemctl enable nginx
     systemctl start nginx
   ignore_errors: yes
 
 - name: Cek nama service Nginx
+  become: yes
   shell: systemctl list-units --type=service | grep nginx | awk '{print $1}'
   register: nginx_service_name
   changed_when: false
@@ -19,9 +22,17 @@
   debug:
     var: nginx_service_name.stdout_lines
 
+- name: Pastikan konfigurasi Nginx valid sebelum restart
+  become: yes
+  command: nginx -t
+  register: nginx_config_check
+  changed_when: nginx_config_check.rc != 0
+  failed_when: nginx_config_check.rc != 0
+
 - name: Restart Nginx dengan nama service yang ditemukan
+  become: yes
   service:
-    name: "{{ nginx_service_name.stdout }}"
+    name: "{{ nginx_service_name.stdout | default('nginx') }}"
     state: restarted
   when: nginx_service_name.stdout | length > 0
   ignore_errors: yes
