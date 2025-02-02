@@ -1,3 +1,4 @@
+---
 - name: Pastikan direktori monitoring tersedia
   file:
     path: "/home/deploy/monitoring"
@@ -13,3 +14,15 @@
     owner: deploy
     group: deploy
     mode: '0644'
+
+- name: Jalankan monitoring dengan Docker Compose
+  become: yes
+  become_user: deploy
+  shell: |
+    if command -v docker-compose &> /dev/null; then
+      docker-compose up -d --build
+    else
+      docker compose up -d --build
+    fi
+  args:
+    chdir: /home/deploy/monitoring

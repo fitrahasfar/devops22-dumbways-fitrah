@@ -1,3 +1,4 @@
+---
 - name: Install Snapd untuk Certbot
   apt:
     name: snapd
@@ -25,13 +26,20 @@
     dest: /root/cloudflare.ini
     mode: '0600'
 
+- name: Pastikan direktori sertifikat ada sebelum generate SSL
+  file:
+    path: "/etc/letsencrypt/live/{{ domain_name }}"
+    state: directory
+    mode: '0755'
+  ignore_errors: yes
+
 - name: Generate Wildcard SSL Certificate menggunakan Cloudflare DNS Challenge
   command: >
-    certbot certonly --dns-cloudflare 
-    --dns-cloudflare-credentials /root/cloudflare.ini 
-    --email {{ email_ssl }} 
-    --agree-tos --no-eff-email 
-    --server https://acme-v02.api.letsencrypt.org/directory 
+    certbot certonly --dns-cloudflare
+    --dns-cloudflare-credentials /root/cloudflare.ini
+    --email {{ email_ssl }}
+    --agree-tos --no-eff-email
+    --server https://acme-v02.api.letsencrypt.org/directory
     -d {{ domain_name }} -d *.{{ domain_name }}
   args:
     creates: "/etc/letsencrypt/live/{{ domain_name }}/fullchain.pem"
