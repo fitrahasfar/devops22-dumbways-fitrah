@@ -20,7 +20,7 @@
 - name: Install plugin Cloudflare untuk Certbot
   command: snap install certbot-dns-cloudflare
 
-- name: Salin konfigurasi Cloudflare API Token
+- name: Pastikan API Token Cloudflare tersimpan dengan benar
   template:
     src: cloudflare.ini.j2
     dest: /root/cloudflare.ini
@@ -43,6 +43,13 @@
     -d {{ domain_name }} -d *.{{ domain_name }}
   args:
     creates: "/etc/letsencrypt/live/{{ domain_name }}/fullchain.pem"
+  ignore_errors: no
+  register: ssl_output
+
+- name: Tampilkan hasil eksekusi Certbot jika terjadi error
+  debug:
+    var: ssl_output.stderr_lines
+  when: ssl_output.rc != 0
 
 - name: Set otomatisasi pembaruan sertifikat SSL
   cron:
