@@ -1,12 +1,3 @@
----
-- name: Pastikan user deploy memiliki akses sudo tanpa password
-  become: yes
-  lineinfile:
-    path: /etc/sudoers.d/deploy
-    create: yes
-    line: "deploy ALL=(ALL) NOPASSWD: ALL"
-    validate: 'visudo -cf %s'
-
 - name: Perbarui daftar paket sebelum instalasi
   become: yes
   apt:
@@ -18,32 +9,12 @@
     name: nginx
     state: present
 
-- name: Cek apakah Nginx sudah terinstal
-  become: yes
-  command: dpkg -l | grep nginx
-  register: nginx_check
-  ignore_errors: yes
-
-- name: Debug hasil pengecekan instalasi Nginx
-  debug:
-    var: nginx_check.stdout_lines
-
 - name: Pastikan Nginx service tersedia dan berjalan
   become: yes
   shell: |
     systemctl enable nginx
     systemctl start nginx
   ignore_errors: yes
-
-- name: Cek nama service Nginx
-  become: yes
-  shell: systemctl list-units --type=service | grep nginx | awk '{print $1}'
-  register: nginx_service_name
-  changed_when: false
-
-- name: Debug nama service Nginx
-  debug:
-    var: nginx_service_name.stdout_lines
 
 - name: Salin konfigurasi Nginx untuk Reverse Proxy Frontend
   become: yes
@@ -73,9 +44,4 @@
     name: "{{ nginx_service_name.stdout | default('nginx') }}"
     state: restarted
   when: nginx_service_name.stdout | length > 0
-  ignore_errors: yes
-
-- name: Pastikan Firewall (UFW) Mengizinkan HTTP dan HTTPS
-  become: yes
-  command: ufw allow 'Nginx Full'
   ignore_errors: yes
