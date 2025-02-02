@@ -1,7 +1,7 @@
 ---
 - name: Pastikan Docker Compose terinstal dengan versi terbaru
   apt:
-    name: docker-compose
+    name: docker-compose-plugin
     state: present
     update_cache: yes
 
@@ -13,11 +13,24 @@
     group: deploy
     mode: '0755'
 
-- name: Clone repository frontend dari GitHub
+- name: Clone repository frontend dari GitHub (jika belum ada)
   become: yes
-  shell: sudo -u deploy git clone --branch main --single-branch https://github.com/dumbwaysdev/literature-frontend.git /home/deploy/literature-frontend
+  shell: |
+    if [ ! -d "/home/deploy/literature-frontend/.git" ]; then
+      sudo -u deploy git clone --branch main --single-branch https://github.com/dumbwaysdev/literature-frontend.git /home/deploy/literature-frontend
+    fi
   args:
-    creates: /home/deploy/literature-frontend
+    chdir: /home/deploy
+  ignore_errors: yes
+
+- name: Reset repository frontend ke versi terbaru
+  become: yes
+  shell: |
+    sudo -u deploy git reset --hard
+    sudo -u deploy git pull origin main
+  args:
+    chdir: /home/deploy/literature-frontend
+  ignore_errors: yes
 
 - name: Pastikan file Dockerfile memiliki izin yang benar
   template:
@@ -41,10 +54,10 @@
     groups: docker
     append: yes
 
-- name: Pastikan user deploy memiliki akses ke Docker CLI tanpa restart
-  shell: newgrp docker
+- name: Pastikan user deploy memiliki akses ke Docker CLI
   become: yes
-  become_user: deploy
+  shell: |
+    sudo usermod -aG docker deploy
   ignore_errors: yes
 
 - name: Pastikan service Docker berjalan
@@ -53,10 +66,21 @@
     state: started
     enabled: yes
 
-- name: Bangun dan jalankan aplikasi frontend dengan Docker Compose
+- name: Cek apakah Docker Compose dapat dijalankan
+  become: yes
+  become_user: deploy
+  shell: docker compose version || docker-compose version
+  register: docker_compose_check
+  ignore_errors: yes
+
+- name: Gunakan perintah yang sesuai untuk menjalankan Docker Compose
   become: yes
   become_user: deploy
   shell: |
-    docker compose up -d --build
+    if command -v docker-compose &> /dev/null; then
+      docker-compose up -d --build
+    else
+      docker compose up -d --build
+    fi
   args:
     chdir: /home/deploy/literature-frontend
