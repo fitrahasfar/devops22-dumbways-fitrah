@@ -1,11 +1,5 @@
+---
 - name: Pastikan Docker Compose terinstal dengan versi terbaru
-  apt:
-    name: docker-compose
-    state: present
-    update_cache: yes
-
-
-- name: Pastikan Docker Compose terinstal
   apt:
     name: docker-compose
     state: present
@@ -21,12 +15,9 @@
 
 - name: Clone repository frontend dari GitHub
   become: yes
-  become_user: deploy
-  git:
-    repo: "https://github.com/dumbwaysdev/literature-frontend.git"
-    dest: "/home/deploy/literature-frontend"
-    version: main
-    force: yes
+  shell: sudo -u deploy git clone --branch main --single-branch https://github.com/dumbwaysdev/literature-frontend.git /home/deploy/literature-frontend
+  args:
+    creates: /home/deploy/literature-frontend
 
 - name: Pastikan file Dockerfile memiliki izin yang benar
   template:
@@ -50,10 +41,22 @@
     groups: docker
     append: yes
 
+- name: Pastikan user deploy memiliki akses ke Docker CLI tanpa restart
+  shell: newgrp docker
+  become: yes
+  become_user: deploy
+  ignore_errors: yes
+
+- name: Pastikan service Docker berjalan
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
 - name: Bangun dan jalankan aplikasi frontend dengan Docker Compose
   become: yes
   become_user: deploy
   shell: |
-    docker-compose up -d --build
+    docker compose up -d --build
   args:
     chdir: /home/deploy/literature-frontend
