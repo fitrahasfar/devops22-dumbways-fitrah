@@ -3,3 +3,4 @@
   become: yes
   roles:
     - user_setup
+    - app_deploy

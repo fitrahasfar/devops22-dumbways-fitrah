@@ -1,0 +1,49 @@
+---
+- name: Perbarui package list
+  apt:
+    update_cache: yes
+
+- name: Install dependensi awal
+  apt:
+    name: 
+      - ca-certificates
+      - curl
+    state: present
+
+- name: Buat direktori untuk GPG key Docker
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+
+- name: Unduh GPG key resmi Docker
+  get_url:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    dest: /etc/apt/keyrings/docker.asc
+    mode: '0644'
+
+- name: Tambahkan repository Docker ke sources.list.d
+  shell: |
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+    $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+- name: Perbarui package list setelah menambah repo
+  apt:
+    update_cache: yes
+
+- name: Install Docker dan komponennya
+  apt:
+    name: 
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+      - docker-compose
+    state: present
+
+- name: Tambahkan user deploy ke grup docker
+  user:
+    name: deploy
+    groups: docker
+    append: yes
