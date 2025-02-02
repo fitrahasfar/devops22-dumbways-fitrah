@@ -15,14 +15,38 @@
     group: deploy
     mode: '0644'
 
-- name: Jalankan monitoring dengan Docker Compose
+- name: Tambahkan user deploy ke grup docker (agar bisa menjalankan container tanpa sudo)
+  user:
+    name: deploy
+    groups: docker
+    append: yes
+
+- name: Pastikan service Docker berjalan
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Pastikan user deploy memiliki akses ke Docker tanpa logout
   become: yes
-  become_user: deploy
+  shell: sudo usermod -aG docker deploy
+  ignore_errors: yes
+
+- name: Cek apakah Docker Compose dapat dijalankan
+  become: yes
   shell: |
-    if command -v docker-compose &> /dev/null; then
-      docker-compose up -d --build
-    else
-      docker compose up -d --build
-    fi
-  args:
-    chdir: /home/deploy/monitoring
+    docker compose version || docker-compose version
+  register: docker_compose_check
+  ignore_errors: yes
+
+- name: Pastikan file docker-compose dapat dieksekusi
+  file:
+    path: "/home/deploy/monitoring/docker-compose.yml"
+    owner: deploy
+    group: deploy
+    mode: '0644'
+
+- name: Jalankan monitoring dengan Docker Compose sebagai user deploy
+  become: yes
+  shell: |
+    sudo -u deploy bash -c "cd /home/deploy/monitoring && docker compose up -d --build"
