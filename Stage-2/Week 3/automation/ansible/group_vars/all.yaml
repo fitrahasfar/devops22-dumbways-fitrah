@@ -1,0 +1,5 @@
+deploy_user: deploy
+deploy_password: "{{ '123' | password_hash('sha512') }}"
+domain_name: "fitrah.studentdumbways.my.id"
+email_ssl: "fitrah4551@gmail.com"
+cloudflare_api_token: "c44f1537636463d700078ddf81cb8295e9caf"
