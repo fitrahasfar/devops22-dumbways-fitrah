@@ -1,8 +1,5 @@
-- hosts: servers
+- name: Ubuntu
+  hosts: ubuntu_servers
   become: yes
   roles:
     - user_setup
-    - docker
-    - frontend
-    - monitoring
-    - reverse_proxy

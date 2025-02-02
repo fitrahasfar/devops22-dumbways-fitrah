@@ -1,6 +1,0 @@
-- name: Pull latest frontend image
-  shell: docker pull mydockerhub/frontend-app:latest
-
-- name: Deploy frontend container
-  shell: |
-    docker run -d --name frontend_container -p 80:80 mydockerhub/frontend-app:latest

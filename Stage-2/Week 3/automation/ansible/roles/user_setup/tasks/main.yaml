@@ -1,17 +1,22 @@
-# Add new user
-- name: Create a new user
+---
+- name: Tambahkan user baru
   user:
-    name: newuser
-    password: "{{ 'password' | password_hash('sha512') }}"
+    name: deploy
+    password: "{{ '123' | password_hash('sha512') }}"
+    shell: /bin/bash
     groups: sudo
     append: yes
+    createhome: yes
 
-- name: Add SSH key for new user
+- name: Setup SSH Key untuk user deploy
   authorized_key:
-    user: newuser
-    key: "{{ lookup('file', '/.ssh/') }}"
+    user: deploy
+    state: present
+    key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
 
-- name: Update apt cache
-  apt:
-    update_cache: yes
-
+- name: Tambahkan user deploy ke sudoers
+  lineinfile:
+    path: /etc/sudoers.d/deploy
+    create: yes
+    line: 'deploy ALL=(ALL) NOPASSWD: ALL'
+    validate: 'visudo -cf %s'

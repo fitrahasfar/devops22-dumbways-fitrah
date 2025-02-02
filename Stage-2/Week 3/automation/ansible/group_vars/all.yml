@@ -1,7 +1,0 @@
-docker_version: "latest"
-frontend_image: "https://github.com/dumbwaysdev/literature-frontend.git"
-prometheus_image: "prom/prometheus"
-grafana_image: "grafana/grafana"
-node_exporter_image: "prom/node-exporter"
-certbot_email: "fitrah4551@gmail.com"
-domain_name: "muhfitrah.studentdumbways.my.id"
