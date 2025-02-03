@@ -4,8 +4,7 @@
   roles:
     - user_setup
     - docker_install
-    - reverse_proxy
-    - ssl_certificate
     - app_deploy
     - monitoring_setup
-    
+    - reverse_proxy
+    - ssl_certificate
