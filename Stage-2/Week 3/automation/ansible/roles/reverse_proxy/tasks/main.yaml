@@ -27,7 +27,7 @@
     state: link
   notify: Restart Nginx
 
-# Pastikan konfigurasi Nginx valid
+# Pastikan konfigurasi Nginx valid sebelum restart
 - name: Pastikan konfigurasi Nginx valid sebelum restart
   command: nginx -t
   register: nginx_config_check
