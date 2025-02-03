@@ -1,66 +1,36 @@
 ---
-- name: Konfigurasi Reverse Proxy Nginx untuk Frontend
-  hosts: all
-  become: yes
-  tasks:
-    - name: Perbarui daftar paket sebelum instalasi
-      apt:
-        update_cache: yes
+# Pastikan Nginx diinstal
+- name: Install Nginx jika belum ada
+  apt:
+    name: nginx
+    state: present
 
-    - name: Install Nginx jika belum ada
-      apt:
-        name: nginx
-        state: present
+# Pastikan direktori konfigurasi Nginx tersedia
+- name: Pastikan direktori untuk konfigurasi Nginx tersedia
+  file:
+    path: /etc/nginx/sites-available
+    state: directory
+    mode: '0755'
 
-    - name: Cek apakah Nginx dapat berjalan tanpa error
-      command: nginx -t
-      register: nginx_check
-      changed_when: nginx_check.rc != 0
-      failed_when: nginx_check.rc != 0
+# Salin konfigurasi Nginx
+- name: Salin konfigurasi Nginx untuk Reverse Proxy Frontend
+  template:
+    src: frontend.conf.j2
+    dest: /etc/nginx/sites-available/frontend.conf
+  notify: Restart Nginx
 
-    - name: Pastikan Nginx service tersedia dan berjalan
-      systemd:
-        name: nginx
-        enabled: yes
-        state: started
+# Aktifkan konfigurasi Nginx
+- name: Aktifkan konfigurasi Reverse Proxy untuk Frontend
+  file:
+    src: /etc/nginx/sites-available/frontend.conf
+    dest: /etc/nginx/sites-enabled/frontend.conf
+    state: link
+  notify: Restart Nginx
 
-    - name: Cek nama service Nginx
-      shell: systemctl list-units --type=service | grep nginx | awk '{print $1}'
-      register: nginx_service_name
-      changed_when: false
-
-    - name: Debug nama service Nginx
-      debug:
-        var: nginx_service_name.stdout_lines
-
-    - name: Pastikan direktori untuk konfigurasi Nginx tersedia
-      file:
-        path: /etc/nginx/sites-available
-        state: directory
-        mode: '0755'
-
-    - name: Salin konfigurasi Nginx untuk Reverse Proxy Frontend
-      template:
-        src: frontend.conf.j2
-        dest: /etc/nginx/sites-available/frontend.conf
-      notify: Restart Nginx
-
-    - name: Aktifkan konfigurasi Reverse Proxy untuk Frontend
-      file:
-        src: /etc/nginx/sites-available/frontend.conf
-        dest: /etc/nginx/sites-enabled/frontend.conf
-        state: link
-      notify: Restart Nginx
-
-    - name: Pastikan konfigurasi Nginx valid sebelum restart
-      command: nginx -t
-      register: nginx_config_check
-      changed_when: nginx_config_check.rc != 0
-      failed_when: nginx_config_check.rc != 0
-      notify: Restart Nginx
-
-  handlers:
-    - name: Restart Nginx
-      service:
-        name: "{{ nginx_service_name.stdout | default('nginx') }}"
-        state: restarted
+# Pastikan konfigurasi Nginx valid
+- name: Pastikan konfigurasi Nginx valid sebelum restart
+  command: nginx -t
+  register: nginx_config_check
+  changed_when: nginx_config_check.rc != 0
+  failed_when: nginx_config_check.rc != 0
+  notify: Restart Nginx
