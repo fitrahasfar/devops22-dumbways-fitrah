@@ -1,4 +1,4 @@
-server {
+{% comment %} server {
     listen 80;
     server_name {{ domain_name }};
 
@@ -15,4 +15,31 @@ server {
     ssl_certificate_key /etc/letsencrypt/live/{{ domain_name }}/privkey.pem;
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers HIGH:!aNULL:!MD5;
+} {% endcomment %}
+
+server {
+    listen 80;
+    server_name fitrah.studentdumbways.my.id;
+
+    # Pengalihan dari HTTP ke HTTPS
+    return 301 https://$host$request_uri;
+}
+
+# HTTPS - Reverse Proxy dengan SSL
+server {
+    listen 443 ssl;
+    server_name fitrah.studentdumbways.my.id;
+
+    ssl_certificate /etc/letsencrypt/live/fitrah.studentdumbways.my.id/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/fitrah.studentdumbways.my.id/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+
+    location / {
+        proxy_pass http://localhost:3000;  # Pastikan port aplikasi frontend sesuai
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
 }
