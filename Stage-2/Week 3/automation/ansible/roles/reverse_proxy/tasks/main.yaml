@@ -1,3 +1,4 @@
+---
 - name: Perbarui daftar paket sebelum instalasi
   become: yes
   apt:
@@ -37,6 +38,7 @@
   register: nginx_config_check
   changed_when: nginx_config_check.rc != 0
   failed_when: nginx_config_check.rc != 0
+  notify: Restart Nginx
 
 - name: Restart Nginx dengan nama service yang ditemukan
   become: yes
