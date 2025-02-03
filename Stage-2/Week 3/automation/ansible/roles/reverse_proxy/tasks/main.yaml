@@ -60,7 +60,8 @@
 
 ---
 - name: Instal dan Konfigurasi Reverse Proxy Nginx
-  become: yes
+  hosts: all # atau host yang sesuai
+  become: yes # jika diperlukan
 
   tasks:
     - name: Update cache paket
