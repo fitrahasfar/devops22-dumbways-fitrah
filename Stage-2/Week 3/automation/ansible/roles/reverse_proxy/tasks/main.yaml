@@ -37,8 +37,8 @@
 - name: Salin konfigurasi Nginx untuk Reverse Proxy Frontend
   become: yes
   template:
-    src: templates/frontend.conf.j2
-    dest: /etc/nginx/sites-available/frontend
+    src: frontend.conf.j2
+    dest: /etc/nginx/sites-available/frontend/frontend.conf
   notify: Restart Nginx
 
 - name: Aktifkan konfigurasi Reverse Proxy untuk Frontend

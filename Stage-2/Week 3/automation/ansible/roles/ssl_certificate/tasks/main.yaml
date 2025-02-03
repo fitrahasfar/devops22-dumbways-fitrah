@@ -1,53 +1,61 @@
 ---
-- name: Perbarui daftar paket sebelum instalasi
-  become: yes
+- name: Install Snapd untuk Certbot
   apt:
+    name: snapd
+    state: present
     update_cache: yes
 
-- name: Install Nginx jika belum ada
-  become: yes
-  apt:
-    name: nginx
-    state: present
+- name: Install Certbot melalui Snap
+  command: snap install --classic certbot
 
-- name: Cek apakah Nginx dapat berjalan tanpa error
-  become: yes
-  command: nginx -t
-  register: nginx_check
-  changed_when: nginx_check.rc != 0
-  failed_when: nginx_check.rc != 0
+- name: Pastikan Certbot dapat diakses dari `/usr/bin`
+  file:
+    src: /snap/bin/certbot
+    dest: /usr/bin/certbot
+    state: link
 
-- name: Pastikan Nginx service tersedia dan berjalan
-  become: yes
-  shell: |
-    systemctl enable nginx || true
-    systemctl start nginx || true
+- name: Set Certbot agar dapat menggunakan plugin dengan root
+  command: snap set certbot trust-plugin-with-root=ok
+
+- name: Install plugin Cloudflare untuk Certbot
+  command: snap install certbot-dns-cloudflare
+
+- name: Pastikan API Token Cloudflare tersimpan dengan benar
+  template:
+    src: cloudflare.ini.j2
+    dest: /root/cloudflare.ini
+    mode: '0600'
+
+- name: Pastikan direktori sertifikat ada sebelum generate SSL
+  file:
+    path: "/etc/letsencrypt/live/{{ domain_name }}"
+    state: directory
+    mode: '0755'
   ignore_errors: yes
 
-- name: Cek nama service Nginx
-  become: yes
-  shell: systemctl list-units --type=service | grep nginx | awk '{print $1}'
-  register: nginx_service_name
-  changed_when: false
+- name: Generate Wildcard SSL Certificate menggunakan Cloudflare DNS Challenge
+  command: >
+    certbot certonly --dns-cloudflare
+    --dns-cloudflare-credentials /root/cloudflare.ini
+    --email {{ email_ssl }}
+    --agree-tos --no-eff-email
+    --server https://acme-v02.api.letsencrypt.org/directory
+    -d {{ domain_name }} -d *.{{ domain_name }}
+  args:
+    creates: "/etc/letsencrypt/live/{{ domain_name }}/fullchain.pem"
+  ignore_errors: no
+  register: ssl_output
 
-- name: Debug nama service Nginx
+- name: Tampilkan hasil eksekusi Certbot jika terjadi error
   debug:
-    var: nginx_service_name.stdout_lines
+    var: ssl_output.stderr_lines
+  when: ssl_output.rc != 0
 
-- name: Salin konfigurasi Nginx untuk Reverse Proxy Frontend
-  become: yes
-  template:
-    src: templates/frontend.conf.j2
-    dest: /etc/nginx/sites-available/frontend
-  notify: Restart Nginx
-
-- name: Aktifkan konfigurasi Reverse Proxy untuk Frontend
-  become: yes
-  file:
-    src: /etc/nginx/sites-available/frontend
-    dest: /etc/nginx/sites-enabled/frontend
-    state: link
-  notify: Restart Nginx
+- name: Set otomatisasi pembaruan sertifikat SSL
+  cron:
+    name: "Renew SSL Certificate"
+    job: "certbot renew --quiet --dns-cloudflare --dns-cloudflare-credentials /root/cloudflare.ini"
+    state: present
 
 - name: Pastikan konfigurasi Nginx valid sebelum restart
   become: yes
@@ -55,12 +63,10 @@
   register: nginx_config_check
   changed_when: nginx_config_check.rc != 0
   failed_when: nginx_config_check.rc != 0
-  notify: Restart Nginx
 
-- name: Restart Nginx dengan nama service yang ditemukan
+- name: Restart Nginx untuk menerapkan SSL
   become: yes
   service:
-    name: "{{ nginx_service_name.stdout | default('nginx') }}"
+    name: nginx
     state: restarted
-  when: nginx_service_name.stdout is defined and nginx_service_name.stdout | length > 0
-  ignore_errors: yes
+  when: nginx_config_check.rc == 0
