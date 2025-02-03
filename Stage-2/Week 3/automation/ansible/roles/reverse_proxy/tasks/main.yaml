@@ -34,18 +34,26 @@
   debug:
     var: nginx_service_name.stdout_lines
 
+# ✅ Tambahkan Task untuk Membuat Direktori yang Hilang
+- name: Pastikan direktori untuk konfigurasi Nginx tersedia
+  become: yes
+  file:
+    path: /etc/nginx/sites-available
+    state: directory
+    mode: '0755'
+
 - name: Salin konfigurasi Nginx untuk Reverse Proxy Frontend
   become: yes
   template:
     src: frontend.conf.j2
-    dest: /etc/nginx/sites-available/frontend/frontend.conf
+    dest: /etc/nginx/sites-available/frontend.conf
   notify: Restart Nginx
 
 - name: Aktifkan konfigurasi Reverse Proxy untuk Frontend
   become: yes
   file:
-    src: /etc/nginx/sites-available/frontend
-    dest: /etc/nginx/sites-enabled/frontend
+    src: /etc/nginx/sites-available/frontend.conf
+    dest: /etc/nginx/sites-enabled/frontend.conf
     state: link
   notify: Restart Nginx
 
