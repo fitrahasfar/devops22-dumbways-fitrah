@@ -24,7 +24,6 @@
     src: /etc/nginx/sites-available/frontend.conf
     dest: /etc/nginx/sites-enabled/frontend.conf
     state: link
-  notify: restart
 
 # Pastikan konfigurasi Nginx valid sebelum restart
 - name: Pastikan konfigurasi Nginx valid sebelum restart
@@ -33,9 +32,9 @@
   changed_when: nginx_config_check.rc != 0
   failed_when: nginx_config_check.rc != 0
 
+# Restart Nginx
+- name: Restart Nginx
+  service:
+    name: nginx
+    state: restarted
 
-  handlers:
-    - name: restart
-      service:
-              name: "nginx"
-              state: restarted
