@@ -57,7 +57,16 @@
     job: "certbot renew --quiet --dns-cloudflare --dns-cloudflare-credentials /root/cloudflare.ini"
     state: present
 
+- name: Pastikan konfigurasi Nginx valid sebelum restart
+  become: yes
+  command: nginx -t
+  register: nginx_config_check
+  changed_when: nginx_config_check.rc != 0
+  failed_when: nginx_config_check.rc != 0
+
 - name: Restart Nginx untuk menerapkan SSL
+  become: yes
   service:
     name: nginx
     state: restarted
+  when: nginx_config_check.rc == 0

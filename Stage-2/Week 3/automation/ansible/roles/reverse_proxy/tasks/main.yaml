@@ -17,6 +17,16 @@
     systemctl start nginx
   ignore_errors: yes
 
+- name: Cek nama service Nginx
+  become: yes
+  shell: systemctl list-units --type=service | grep nginx | awk '{print $1}'
+  register: nginx_service_name
+  changed_when: false
+
+- name: Debug nama service Nginx
+  debug:
+    var: nginx_service_name.stdout_lines
+
 - name: Salin konfigurasi Nginx untuk Reverse Proxy Frontend
   become: yes
   template:
@@ -45,5 +55,5 @@
   service:
     name: "{{ nginx_service_name.stdout | default('nginx') }}"
     state: restarted
-  when: nginx_service_name.stdout | length > 0
+  when: nginx_service_name.stdout is defined and nginx_service_name.stdout | length > 0
   ignore_errors: yes
