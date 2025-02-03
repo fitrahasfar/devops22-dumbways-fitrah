@@ -2,9 +2,9 @@
   hosts: ubuntu_servers
   become: yes
   roles:
-    - user_setup
-    - docker_install
-    - app_deploy
-    - monitoring_setup
+    # - user_setup
+    # - docker_install
+    # - app_deploy
+    # - monitoring_setup
     - reverse_proxy
     - ssl_certificate
