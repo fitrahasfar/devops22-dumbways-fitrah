@@ -17,7 +17,6 @@
   template:
     src: frontend.conf.j2
     dest: /etc/nginx/sites-available/frontend.conf
-  notify: Restart Nginx
 
 # Aktifkan konfigurasi Nginx
 - name: Aktifkan konfigurasi Reverse Proxy untuk Frontend
@@ -25,7 +24,6 @@
     src: /etc/nginx/sites-available/frontend.conf
     dest: /etc/nginx/sites-enabled/frontend.conf
     state: link
-  notify: Restart Nginx
 
 # Pastikan konfigurasi Nginx valid sebelum restart
 - name: Pastikan konfigurasi Nginx valid sebelum restart
@@ -33,4 +31,9 @@
   register: nginx_config_check
   changed_when: nginx_config_check.rc != 0
   failed_when: nginx_config_check.rc != 0
-  notify: Restart Nginx
+
+# Restart Nginx
+- name: Restart Nginx
+  service:
+    name: nginx
+    state: restarted
