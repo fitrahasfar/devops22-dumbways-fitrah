@@ -1,103 +1,66 @@
-# ---
-# - name: Perbarui daftar paket sebelum instalasi
-#   become: yes
-#   apt:
-#     update_cache: yes
-
-# - name: Install Nginx jika belum ada
-#   become: yes
-#   apt:
-#     name: nginx
-#     state: present
-
-# - name: Pastikan Nginx service tersedia dan berjalan
-#   become: yes
-#   shell: |
-#     systemctl enable nginx
-#     systemctl start nginx
-#   ignore_errors: yes
-
-# - name: Cek nama service Nginx
-#   become: yes
-#   shell: systemctl list-units --type=service | grep nginx | awk '{print $1}'
-#   register: nginx_service_name
-#   changed_when: false
-
-# - name: Debug nama service Nginx
-#   debug:
-#     var: nginx_service_name.stdout_lines
-
-# - name: Salin konfigurasi Nginx untuk Reverse Proxy Frontend
-#   become: yes
-#   template:
-#     src: templates/frontend.conf.j2
-#     dest: /etc/nginx/sites-available/frontend
-#   notify: Restart Nginx
-
-# - name: Aktifkan konfigurasi Reverse Proxy untuk Frontend
-#   become: yes
-#   file:
-#     src: /etc/nginx/sites-available/frontend
-#     dest: /etc/nginx/sites-enabled/frontend
-#     state: link
-#   notify: Restart Nginx
-
-# - name: Pastikan konfigurasi Nginx valid sebelum restart
-#   become: yes
-#   command: nginx -t
-#   register: nginx_config_check
-#   changed_when: nginx_config_check.rc != 0
-#   failed_when: nginx_config_check.rc != 0
-#   notify: Restart Nginx
-
-# - name: Restart Nginx dengan nama service yang ditemukan
-#   become: yes
-#   service:
-#     name: "{{ nginx_service_name.stdout | default('nginx') }}"
-#     state: restarted
-#   when: nginx_service_name.stdout is defined and nginx_service_name.stdout | length > 0
-#   ignore_errors: yes
-
 ---
-- name: Instal dan Konfigurasi Reverse Proxy Nginx
-  hosts: all # atau host yang sesuai
-  become: yes # jika diperlukan
+- name: Perbarui daftar paket sebelum instalasi
+  become: yes
+  apt:
+    update_cache: yes
 
+- name: Install Nginx jika belum ada
+  become: yes
+  apt:
+    name: nginx
+    state: present
 
-  tasks:
-    - name: Update cache paket
-      apt:
-        update_cache: yes
+- name: Cek apakah Nginx dapat berjalan tanpa error
+  become: yes
+  command: nginx -t
+  register: nginx_check
+  changed_when: nginx_check.rc != 0
+  failed_when: nginx_check.rc != 0
 
-    - name: Instal Nginx
-      apt:
-        name: nginx
-        state: present
+- name: Pastikan Nginx service tersedia dan berjalan
+  become: yes
+  shell: |
+    systemctl enable nginx || true
+    systemctl start nginx || true
+  ignore_errors: yes
 
-    - name: Salin konfigurasi Nginx untuk Reverse Proxy Frontend
-      template:
-        src: templates/frontend.conf.j2
-        dest: /etc/nginx/sites-available/frontend
-      notify: Periksa Konfigurasi Nginx
+- name: Cek nama service Nginx
+  become: yes
+  shell: systemctl list-units --type=service | grep nginx | awk '{print $1}'
+  register: nginx_service_name
+  changed_when: false
 
-    - name: Aktifkan konfigurasi Reverse Proxy
-      file:
-        src: /etc/nginx/sites-available/frontend
-        dest: /etc/nginx/sites-enabled/frontend
-        state: link
-      notify: Periksa Konfigurasi Nginx
+- name: Debug nama service Nginx
+  debug:
+    var: nginx_service_name.stdout_lines
 
-    - name: Periksa Konfigurasi Nginx (dan restart jika valid)
-      handlers:
-        - name: Periksa Konfigurasi Nginx
-          command: nginx -t
-          register: nginx_config_check
-          changed_when: nginx_config_check.rc != 0
-          failed_when: nginx_config_check.rc != 0
-          notify: Restart Nginx
+- name: Salin konfigurasi Nginx untuk Reverse Proxy Frontend
+  become: yes
+  template:
+    src: templates/frontend.conf.j2
+    dest: /etc/nginx/sites-available/frontend
+  notify: Restart Nginx
 
-        - name: Restart Nginx
-          service:
-            name: nginx
-            state: restarted
-          when: nginx_config_check.rc == 0
+- name: Aktifkan konfigurasi Reverse Proxy untuk Frontend
+  become: yes
+  file:
+    src: /etc/nginx/sites-available/frontend
+    dest: /etc/nginx/sites-enabled/frontend
+    state: link
+  notify: Restart Nginx
+
+- name: Pastikan konfigurasi Nginx valid sebelum restart
+  become: yes
+  command: nginx -t
+  register: nginx_config_check
+  changed_when: nginx_config_check.rc != 0
+  failed_when: nginx_config_check.rc != 0
+  notify: Restart Nginx
+
+- name: Restart Nginx dengan nama service yang ditemukan
+  become: yes
+  service:
+    name: "{{ nginx_service_name.stdout | default('nginx') }}"
+    state: restarted
+  when: nginx_service_name.stdout is defined and nginx_service_name.stdout | length > 0
+  ignore_errors: yes
