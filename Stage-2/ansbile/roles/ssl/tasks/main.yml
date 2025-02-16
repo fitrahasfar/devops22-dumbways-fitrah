@@ -15,6 +15,10 @@
   shell: snap remove certbot || true
   ignore_errors: yes
 
+- name: Hapus plugin Certbot jika ada yang tersisa
+  shell: snap list | grep certbot-dns-cloudflare && snap remove certbot-dns-cloudflare || true
+  ignore_errors: yes
+
 - name: Install Certbot melalui Snap
   shell: snap install --classic certbot
   args:
@@ -27,11 +31,11 @@
     state: link
     force: yes
 
-- name: Set izin plugin Certbot agar berjalan dengan root (Setelah Install Certbot)
+- name: Set izin plugin Certbot agar berjalan dengan root sebelum menginstal plugin
   shell: snap set certbot trust-plugin-with-root=ok
 
-- name: Install Plugin DNS Cloudflare untuk Certbot
-  shell: snap install certbot-dns-cloudflare
+- name: Install Plugin DNS Cloudflare untuk Certbot (Bypass Snap Restriction)
+  shell: snap install --classic --dangerous certbot-dns-cloudflare
   args:
     creates: /snap/bin/certbot-dns-cloudflare
 
