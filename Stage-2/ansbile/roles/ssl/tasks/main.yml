@@ -11,8 +11,12 @@
     state: started
     enabled: yes
 
-- name: Hapus Certbot jika sudah terinstall sebelumnya (Opsional)
+- name: Hapus Certbot jika sudah terinstall sebelumnya
   shell: snap remove certbot || true
+  ignore_errors: yes
+
+- name: Hapus plugin Certbot jika ada yang tersisa
+  shell: snap list | grep certbot-dns-cloudflare && snap remove certbot-dns-cloudflare || true
   ignore_errors: yes
 
 - name: Install Certbot melalui Snap
@@ -27,12 +31,10 @@
     state: link
     force: yes
 
-- name: Perbarui Cloudflare SDK ke versi terbaru
-  pip:
-    name: cloudflare
-    state: latest
+- name: Set izin plugin Certbot agar berjalan dengan root sebelum menginstal plugin
+  shell: snap set certbot trust-plugin-with-root=ok
 
-- name: Pastikan Certbot Plugin Cloudflare sudah terinstall
+- name: Install Plugin DNS Cloudflare untuk Certbot
   shell: snap install certbot-dns-cloudflare
   args:
     creates: /snap/bin/certbot-dns-cloudflare
@@ -42,15 +44,6 @@
     src: cloudflare.ini.j2
     dest: /root/cloudflare.ini
     mode: '0600'
-
-- name: Debug - Periksa isi Cloudflare API Token
-  shell: cat /root/cloudflare.ini
-  register: cloudflare_token_check
-  changed_when: false
-
-- name: Tampilkan isi Cloudflare API Token untuk memastikan validitas
-  debug:
-    var: cloudflare_token_check.stdout_lines
 
 - name: Pastikan direktori untuk sertifikat ada
   file:
@@ -63,14 +56,14 @@
   command: >
     certbot certonly --dns-cloudflare
     --dns-cloudflare-credentials /root/cloudflare.ini
-    --email {{ email_ssl }}
+    --email fitrah4551@gmail.com
     --agree-tos --no-eff-email
     --server https://acme-v02.api.letsencrypt.org/directory
     -d {{ domain_name }} -d *.{{ domain_name }}
   args:
     creates: "/etc/letsencrypt/live/{{ domain_name }}/fullchain.pem"
-  register: ssl_output
   ignore_errors: no
+  register: ssl_output
 
 - name: Tampilkan hasil eksekusi Certbot jika terjadi error
   debug:
@@ -84,14 +77,12 @@
     state: present
 
 - name: Pastikan konfigurasi Nginx valid sebelum restart
-  become: yes
-  command: nginx -t
+  shell: nginx -t
   register: nginx_config_check
   changed_when: nginx_config_check.rc != 0
   failed_when: nginx_config_check.rc != 0
 
 - name: Restart Nginx untuk menerapkan SSL
-  become: yes
   service:
     name: nginx
     state: restarted
