@@ -1,0 +1,14 @@
+---
+- name: Install Certbot
+  shell: snap install --classic certbot
+
+- name: Generate Wildcard SSL Certificate
+  command: >
+    certbot certonly --dns-cloudflare
+    --dns-cloudflare-credentials /root/cloudflare.ini
+    --email {{ email_ssl }}
+    --agree-tos --no-eff-email
+    --server https://acme-v02.api.letsencrypt.org/directory
+    -d *.{{ domain_name }}
+  args:
+    creates: "/etc/letsencrypt/live/{{ domain_name }}/fullchain.pem"

@@ -1,0 +1,17 @@
+---
+- name: Copy Nginx Configuration
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/sites-available/monitoring
+    mode: '0644'
+
+- name: Enable Nginx Configuration
+  file:
+    src: /etc/nginx/sites-available/monitoring
+    dest: /etc/nginx/sites-enabled/monitoring
+    state: link
+
+- name: Restart Nginx
+  service:
+    name: nginx
+    state: restarted

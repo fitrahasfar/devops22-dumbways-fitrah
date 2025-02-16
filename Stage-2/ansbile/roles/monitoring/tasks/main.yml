@@ -1,0 +1,13 @@
+---
+- name: Copy Monitoring Docker Compose Template
+  template:
+    src: monitoring-compose.yml.j2
+    dest: /home/deploy/monitoring/docker-compose.yml
+    owner: deploy
+    group: deploy
+    mode: '0644'
+
+- name: Start Monitoring Containers
+  shell: |
+    cd /home/deploy/monitoring
+    docker compose up -d --build

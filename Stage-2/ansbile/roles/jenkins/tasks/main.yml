@@ -1,0 +1,11 @@
+---
+- name: Copy Jenkins Docker Compose Template
+  template:
+    src: docker-compose.yml.j2
+    dest: /home/deploy/jenkins/docker-compose.yml
+    mode: '0644'
+
+- name: Start Jenkins Container
+  shell: |
+    cd /home/deploy/jenkins
+    docker compose up -d --build
