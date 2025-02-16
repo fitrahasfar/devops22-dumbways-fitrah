@@ -1,4 +1,10 @@
 ---
+- name: Pastikan direktori Monitoring tersedia
+  file:
+    path: /home/jenkinsandmonitoring/monitoring
+    state: directory
+    mode: '0755'
+
 - name: Copy Monitoring Docker Compose Template
   template:
     src: monitoring-compose.yml.j2
