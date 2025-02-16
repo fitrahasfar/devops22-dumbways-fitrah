@@ -1,14 +1,51 @@
 ---
-- name: Install Certbot
+- name: Install Snapd untuk Certbot
+  apt:
+    name: snapd
+    state: present
+    update_cache: yes
+
+- name: Install Certbot melalui Snap
   shell: snap install --classic certbot
 
-- name: Generate Wildcard SSL Certificate
+- name: Pastikan Certbot dapat diakses dari /usr/bin
+  file:
+    src: /snap/bin/certbot
+    dest: /usr/bin/certbot
+    state: link
+
+- name: Install Plugin DNS Cloudflare untuk Certbot
+  shell: snap install certbot-dns-cloudflare
+
+- name: Set Certbot agar dapat menggunakan plugin dengan root
+  shell: snap set certbot trust-plugin-with-root=ok
+
+- name: Pastikan API Token Cloudflare tersimpan dengan benar
+  template:
+    src: cloudflare.ini.j2
+    dest: /root/cloudflare.ini
+    mode: '0600'
+
+- name: Generate Wildcard SSL Certificate menggunakan Cloudflare DNS Challenge
   command: >
     certbot certonly --dns-cloudflare
+    --dns-cloudflare-propagation-seconds 30
     --dns-cloudflare-credentials /root/cloudflare.ini
     --email {{ email_ssl }}
     --agree-tos --no-eff-email
     --server https://acme-v02.api.letsencrypt.org/directory
-    -d *.{{ domain_name }}
+    -d {{ domain_name }} -d *.{{ domain_name }}
   args:
     creates: "/etc/letsencrypt/live/{{ domain_name }}/fullchain.pem"
+  register: ssl_output
+
+- name: Tampilkan hasil eksekusi Certbot jika terjadi error
+  debug:
+    var: ssl_output.stderr_lines
+  when: ssl_output.rc != 0
+
+- name: Set otomatisasi pembaruan sertifikat SSL
+  cron:
+    name: "Renew SSL Certificate"
+    job: "certbot renew --quiet --dns-cloudflare --dns-cloudflare-credentials /root/cloudflare.ini"
+    state: present
