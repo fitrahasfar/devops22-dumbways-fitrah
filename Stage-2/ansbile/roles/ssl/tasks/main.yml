@@ -34,8 +34,8 @@
 - name: Set izin plugin Certbot agar berjalan dengan root sebelum menginstal plugin
   shell: snap set certbot trust-plugin-with-root=ok
 
-- name: Install Plugin DNS Cloudflare untuk Certbot (Bypass Snap Restriction)
-  shell: snap install --classic --dangerous certbot-dns-cloudflare
+- name: Install Plugin DNS Cloudflare untuk Certbot
+  shell: snap install certbot-dns-cloudflare
   args:
     creates: /snap/bin/certbot-dns-cloudflare
 
