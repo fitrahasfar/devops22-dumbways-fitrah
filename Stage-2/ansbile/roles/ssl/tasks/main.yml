@@ -7,24 +7,36 @@
 
 - name: Install Certbot melalui Snap
   shell: snap install --classic certbot
+  args:
+    creates: /snap/bin/certbot
 
 - name: Pastikan Certbot dapat diakses dari /usr/bin
   file:
     src: /snap/bin/certbot
     dest: /usr/bin/certbot
     state: link
+    force: yes
+
+- name: Set trust plugin Certbot agar berjalan dengan root
+  shell: snap set certbot trust-plugin-with-root=ok
 
 - name: Install Plugin DNS Cloudflare untuk Certbot
   shell: snap install certbot-dns-cloudflare
-
-- name: Set Certbot agar dapat menggunakan plugin dengan root
-  shell: snap set certbot trust-plugin-with-root=ok
+  args:
+    creates: /snap/bin/certbot-dns-cloudflare
 
 - name: Pastikan API Token Cloudflare tersimpan dengan benar
   template:
     src: cloudflare.ini.j2
     dest: /root/cloudflare.ini
     mode: '0600'
+
+- name: Pastikan direktori untuk sertifikat ada
+  file:
+    path: "/etc/letsencrypt/live/{{ domain_name }}"
+    state: directory
+    mode: '0755'
+  ignore_errors: yes
 
 - name: Generate Wildcard SSL Certificate menggunakan Cloudflare DNS Challenge
   command: >
@@ -47,5 +59,17 @@
 - name: Set otomatisasi pembaruan sertifikat SSL
   cron:
     name: "Renew SSL Certificate"
-    job: "certbot renew --quiet --dns-cloudflare --dns-cloudflare-credentials /root/cloudflare.ini"
+    job: "/usr/bin/certbot renew --quiet --dns-cloudflare --dns-cloudflare-credentials /root/cloudflare.ini"
     state: present
+
+- name: Pastikan konfigurasi Nginx valid sebelum restart
+  shell: nginx -t
+  register: nginx_config_check
+  changed_when: nginx_config_check.rc != 0
+  failed_when: nginx_config_check.rc != 0
+
+- name: Restart Nginx untuk menerapkan SSL
+  service:
+    name: nginx
+    state: restarted
+  when: nginx_config_check.rc == 0
