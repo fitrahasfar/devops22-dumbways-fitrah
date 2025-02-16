@@ -1,17 +1,42 @@
 ---
-- name: Copy Nginx Configuration
+- name: Copy nginx.conf
   template:
     src: nginx.conf.j2
-    dest: /etc/nginx/sites-available/monitoring
-    mode: '0644'
+    dest: /etc/nginx/nginx.conf
+  notify: Restart Nginx
 
-- name: Enable Nginx Configuration
+- name: Copy Reverse Proxy Config for Jenkins
+  template:
+    src: jenkins.conf.j2
+    dest: /etc/nginx/sites-available/jenkins
+  notify: Restart Nginx
+
+- name: Copy Reverse Proxy Config for Grafana
+  template:
+    src: grafana.conf.j2
+    dest: /etc/nginx/sites-available/grafana
+  notify: Restart Nginx
+
+- name: Copy Reverse Proxy Config for Prometheus
+  template:
+    src: prometheus.conf.j2
+    dest: /etc/nginx/sites-available/prometheus
+  notify: Restart Nginx
+
+- name: Copy Reverse Proxy Config for Node Exporter
+  template:
+    src: node_exporter.conf.j2
+    dest: /etc/nginx/sites-available/node_exporter
+  notify: Restart Nginx
+
+- name: Enable sites
   file:
-    src: /etc/nginx/sites-available/monitoring
-    dest: /etc/nginx/sites-enabled/monitoring
+    src: "/etc/nginx/sites-available/{{ item }}"
+    dest: "/etc/nginx/sites-enabled/{{ item }}"
     state: link
-
-- name: Restart Nginx
-  service:
-    name: nginx
-    state: restarted
+  loop:
+    - jenkins
+    - grafana
+    - prometheus
+    - node_exporter
+  notify: Restart Nginx

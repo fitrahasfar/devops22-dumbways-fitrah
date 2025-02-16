@@ -1,11 +1,9 @@
 ---
-- name: Install Nginx
-  apt:
-    name: nginx
-    state: present
+- name: Install and configure Nginx
+  include_tasks: install.yml
 
-- name: Enable Nginx Service
-  service:
-    name: nginx
-    enabled: yes
-    state: started
+- name: Configure Nginx with Reverse Proxy
+  include_tasks: configure.yml
+
+- name: Restart Nginx
+  include_tasks: restart.yml
