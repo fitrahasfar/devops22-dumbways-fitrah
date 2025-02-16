@@ -8,6 +8,7 @@
 - name: Install Certbot melalui Snap
   command: snap install --classic certbot
 
+
 - name: Pastikan Certbot dapat diakses dari `/usr/bin`
   file:
     src: /snap/bin/certbot
@@ -19,6 +20,11 @@
 
 - name: Install plugin Cloudflare untuk Certbot
   command: snap install certbot-dns-cloudflare
+
+- name: Update Cloudflare Python SDK
+  pip:
+    name: cloudflare
+    state: latest
 
 - name: Pastikan API Token Cloudflare tersimpan dengan benar
   template:
