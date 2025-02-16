@@ -1,12 +1,4 @@
 ---
-  # Hapus Certbot dan Cloudflare SDK jika sudah terinstal sebelumnya (Agar tidak ada konflik)
-  - name: Hapus Certbot dan Cloudflare SDK jika ada
-    command: >
-      snap remove certbot || true &&
-      snap remove certbot-dns-cloudflare || true &&
-      apt remove --purge -y certbot python3-certbot-dns-cloudflare &&
-      rm -rf /etc/letsencrypt /var/log/letsencrypt /root/cloudflare.ini
-    ignore_errors: yes
 
   # Pastikan Snapd Terinstal
   - name: Install Snapd
