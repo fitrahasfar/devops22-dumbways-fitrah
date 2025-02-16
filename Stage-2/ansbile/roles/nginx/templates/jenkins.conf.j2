@@ -1,6 +1,6 @@
 server {
     listen 80;
-    server_name jenkins.example.com;
+    server_name jenkins.{{ domain_name }};
 
     location / {
         proxy_pass http://127.0.0.1:8080;
