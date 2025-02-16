@@ -11,12 +11,8 @@
     state: started
     enabled: yes
 
-- name: Hapus Certbot jika sudah terinstall sebelumnya
+- name: Hapus Certbot jika sudah terinstall sebelumnya (Opsional)
   shell: snap remove certbot || true
-  ignore_errors: yes
-
-- name: Hapus plugin Certbot jika ada yang tersisa
-  shell: snap list | grep certbot-dns-cloudflare && snap remove certbot-dns-cloudflare || true
   ignore_errors: yes
 
 - name: Install Certbot melalui Snap
@@ -31,10 +27,12 @@
     state: link
     force: yes
 
-- name: Set izin plugin Certbot agar berjalan dengan root sebelum menginstal plugin
-  shell: snap set certbot trust-plugin-with-root=ok
+- name: Perbarui Cloudflare SDK ke versi terbaru
+  pip:
+    name: cloudflare
+    state: latest
 
-- name: Install Plugin DNS Cloudflare untuk Certbot
+- name: Pastikan Certbot Plugin Cloudflare sudah terinstall
   shell: snap install certbot-dns-cloudflare
   args:
     creates: /snap/bin/certbot-dns-cloudflare
@@ -44,6 +42,15 @@
     src: cloudflare.ini.j2
     dest: /root/cloudflare.ini
     mode: '0600'
+
+- name: Debug - Periksa isi Cloudflare API Token
+  shell: cat /root/cloudflare.ini
+  register: cloudflare_token_check
+  changed_when: false
+
+- name: Tampilkan isi Cloudflare API Token untuk memastikan validitas
+  debug:
+    var: cloudflare_token_check.stdout_lines
 
 - name: Pastikan direktori untuk sertifikat ada
   file:
@@ -62,8 +69,8 @@
     -d {{ domain_name }} -d *.{{ domain_name }}
   args:
     creates: "/etc/letsencrypt/live/{{ domain_name }}/fullchain.pem"
-  ignore_errors: no
   register: ssl_output
+  ignore_errors: no
 
 - name: Tampilkan hasil eksekusi Certbot jika terjadi error
   debug:
@@ -77,12 +84,14 @@
     state: present
 
 - name: Pastikan konfigurasi Nginx valid sebelum restart
-  shell: nginx -t
+  become: yes
+  command: nginx -t
   register: nginx_config_check
   changed_when: nginx_config_check.rc != 0
   failed_when: nginx_config_check.rc != 0
 
 - name: Restart Nginx untuk menerapkan SSL
+  become: yes
   service:
     name: nginx
     state: restarted
