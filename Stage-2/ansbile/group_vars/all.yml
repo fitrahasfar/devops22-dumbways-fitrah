@@ -1,3 +1,5 @@
 domain_name: fitrah.studentdumbways.my.id
 email_ssl: fitrah@example.com
 nginx_user: www-data
+cloudflare_email: "fitrah4551@gmail.com"
+cloudflare_api_key: "c44f1537636463d700078ddf81cb8295e9caf"
