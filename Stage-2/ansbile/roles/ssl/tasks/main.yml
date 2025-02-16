@@ -15,10 +15,6 @@
   shell: snap remove certbot || true
   ignore_errors: yes
 
-- name: Set izin plugin Certbot agar berjalan dengan root
-  shell: snap set certbot trust-plugin-with-root=ok
-  ignore_errors: yes
-
 - name: Install Certbot melalui Snap
   shell: snap install --classic certbot
   args:
@@ -31,9 +27,8 @@
     state: link
     force: yes
 
-- name: Pastikan Snapd diperbarui untuk mendukung Certbot
-  shell: snap refresh certbot
-  ignore_errors: yes
+- name: Set izin plugin Certbot agar berjalan dengan root
+  shell: snap set certbot trust-plugin-with-root=ok
 
 - name: Install Plugin DNS Cloudflare untuk Certbot
   shell: snap install certbot-dns-cloudflare
@@ -56,7 +51,6 @@
 - name: Generate Wildcard SSL Certificate menggunakan Cloudflare DNS Challenge
   command: >
     certbot certonly --dns-cloudflare
-    --dns-cloudflare-propagation-seconds 30
     --dns-cloudflare-credentials /root/cloudflare.ini
     --email {{ email_ssl }}
     --agree-tos --no-eff-email
@@ -64,6 +58,7 @@
     -d {{ domain_name }} -d *.{{ domain_name }}
   args:
     creates: "/etc/letsencrypt/live/{{ domain_name }}/fullchain.pem"
+  ignore_errors: no
   register: ssl_output
 
 - name: Tampilkan hasil eksekusi Certbot jika terjadi error
