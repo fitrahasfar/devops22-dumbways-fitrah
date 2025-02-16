@@ -1,11 +1,17 @@
 ---
+- name: Pastikan direktori Jenkins tersedia
+  file:
+    path: /home/jenkinsandmonitoring/jenkins
+    state: directory
+    mode: '0755'
+
 - name: Copy Jenkins Docker Compose Template
   template:
     src: docker-compose.yml.j2
-    dest: /home/deploy/jenkins/docker-compose.yml
+    dest: /home/jenkinsandmonitoring/jenkins/docker-compose.yml
     mode: '0644'
 
 - name: Start Jenkins Container
   shell: |
-    cd /home/deploy/jenkins
+    cd /home/jenkinsandmonitoring/jenkins
     docker compose up -d --build
