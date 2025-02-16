@@ -1,9 +1,5 @@
 ---
-- name: Setup Certbot dengan Cloudflare DNS Challenge
-  become: yes
-  tasks:
-
-  # 📌 Hapus Certbot dan Cloudflare SDK jika sudah terinstal sebelumnya (Agar tidak ada konflik)
+  # Hapus Certbot dan Cloudflare SDK jika sudah terinstal sebelumnya (Agar tidak ada konflik)
   - name: Hapus Certbot dan Cloudflare SDK jika ada
     command: >
       snap remove certbot || true &&
@@ -12,20 +8,20 @@
       rm -rf /etc/letsencrypt /var/log/letsencrypt /root/cloudflare.ini
     ignore_errors: yes
 
-  # 📌 Pastikan Snapd Terinstal
+  # Pastikan Snapd Terinstal
   - name: Install Snapd
     apt:
       name: snapd
       state: present
       update_cache: yes
 
-  # 📌 Install Certbot via Snap
+  # Install Certbot via Snap
   - name: Install Certbot melalui Snap
     command: snap install --classic certbot
     args:
       creates: /snap/bin/certbot
 
-  # 📌 Buat Symlink agar Certbot bisa diakses via `/usr/bin`
+  # Buat Symlink agar Certbot bisa diakses via `/usr/bin`
   - name: Pastikan Certbot dapat diakses dari `/usr/bin`
     file:
       src: /snap/bin/certbot
@@ -33,23 +29,23 @@
       state: link
     ignore_errors: yes  # Jika sudah ada, abaikan error
 
-  # 📌 Berikan izin ke Certbot untuk menggunakan plugin dengan root
+  # Berikan izin ke Certbot untuk menggunakan plugin dengan root
   - name: Set Certbot agar dapat menggunakan plugin dengan root
     command: snap set certbot trust-plugin-with-root=ok
 
-  # 📌 Install Plugin Cloudflare untuk Certbot
+  # Install Plugin Cloudflare untuk Certbot
   - name: Install plugin Cloudflare untuk Certbot
     command: snap install certbot-dns-cloudflare
     args:
       creates: /snap/bin/certbot-dns-cloudflare
 
-  # 📌 Update Cloudflare Python SDK sebelum menjalankan Certbot
+  # Update Cloudflare Python SDK sebelum menjalankan Certbot
   - name: Update Cloudflare Python SDK
     pip:
       name: cloudflare
       state: latest
 
-  # 📌 Cek versi Cloudflare SDK setelah update
+  # Cek versi Cloudflare SDK setelah update
   - name: Periksa versi Cloudflare SDK setelah update
     shell: pip show cloudflare | grep Version
     register: cloudflare_version_check
@@ -58,14 +54,14 @@
   - debug:
       msg: "Cloudflare SDK Version: {{ cloudflare_version_check.stdout }}"
 
-  # 📌 Pastikan API Token Cloudflare tersimpan dengan benar
+  # Pastikan API Token Cloudflare tersimpan dengan benar
   - name: Pastikan API Token Cloudflare tersimpan dengan benar
     template:
       src: cloudflare.ini.j2
       dest: /root/cloudflare.ini
       mode: '0600'
 
-  # 📌 Pastikan direktori sertifikat ada sebelum generate SSL
+  # Pastikan direktori sertifikat ada sebelum generate SSL
   - name: Pastikan direktori sertifikat ada sebelum generate SSL
     file:
       path: "/etc/letsencrypt/live/{{ domain_name }}"
@@ -73,7 +69,7 @@
       mode: '0755'
     ignore_errors: yes
 
-  # 📌 Generate Wildcard SSL Certificate menggunakan Cloudflare DNS Challenge
+  # Generate Wildcard SSL Certificate menggunakan Cloudflare DNS Challenge
   - name: Generate Wildcard SSL Certificate menggunakan Cloudflare DNS Challenge
     command: >
       certbot certonly --dns-cloudflare
@@ -87,20 +83,20 @@
     register: ssl_output
     ignore_errors: no
 
-  # 📌 Tampilkan error jika ada kegagalan pada proses Certbot
+  # Tampilkan error jika ada kegagalan pada proses Certbot
   - name: Tampilkan hasil eksekusi Certbot jika terjadi error
     debug:
       var: ssl_output.stderr_lines
     when: ssl_output.rc != 0
 
-  # 📌 Set otomatisasi pembaruan sertifikat SSL
+  # Set otomatisasi pembaruan sertifikat SSL
   - name: Set otomatisasi pembaruan sertifikat SSL
     cron:
       name: "Renew SSL Certificate"
       job: "/usr/bin/certbot renew --quiet --dns-cloudflare --dns-cloudflare-credentials /root/cloudflare.ini"
       state: present
 
-  # 📌 Pastikan konfigurasi Nginx valid sebelum restart
+  # Pastikan konfigurasi Nginx valid sebelum restart
   - name: Pastikan konfigurasi Nginx valid sebelum restart
     become: yes
     command: nginx -t
@@ -108,7 +104,7 @@
     changed_when: nginx_config_check.rc != 0
     failed_when: nginx_config_check.rc != 0
 
-  # 📌 Restart Nginx untuk menerapkan SSL
+  # Restart Nginx untuk menerapkan SSL
   - name: Restart Nginx untuk menerapkan SSL
     become: yes
     service:
