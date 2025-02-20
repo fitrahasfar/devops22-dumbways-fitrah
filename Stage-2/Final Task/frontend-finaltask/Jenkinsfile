@@ -1,0 +1,143 @@
+pipeline {
+    agent any
+    environment {
+        REMOTE          = credentials('staging')
+        SERVER          = credentials('staging-user')
+        DIRECTORY       = credentials('directory-frontend-staging')
+        BRANCH          = credentials('branch-staging')
+        IMAGE           = credentials('image-frontend')
+        CONTAINER       = credentials('container-frontend')
+        DISCORD_WEBHOOK = credentials('notify-discord')
+    }
+    stages {
+        stage('Pull new code') {
+            steps {
+                sshagent(['staging']) {  // Pastikan 'staging' adalah ID kredensial SSH di Jenkins
+                    script {
+                        try {
+                            sh """ssh -o StrictHostKeyChecking=no ${env.SERVER} << EOF
+                            cd ${env.DIRECTORY}
+                            git pull origin ${env.BRANCH}
+                            exit
+                            EOF"""
+                            notifyDiscord("Code pulled successfully for **${env.IMAGE}**")
+                        } catch (Exception e) {
+                            notifyDiscord("Error pulling code for **${env.IMAGE}**: ${e.message}")
+                            error("Pull failed")
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Build Frontend Image') {
+            steps {
+                sshagent(['staging']) {
+                    script {
+                        try {
+                            sh """ssh -o StrictHostKeyChecking=no ${env.SERVER} << EOF
+                            cd ${env.DIRECTORY}
+                            docker build --no-cache -t ${env.IMAGE} .
+                            exit
+                            EOF"""
+                            notifyDiscord("Docker build successful for **${env.IMAGE}**")
+                        } catch (Exception e) {
+                            notifyDiscord("Docker build failed for **${env.IMAGE}**: ${e.message}")
+                            error("Build failed")
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Security Scan with Trivy') {
+            steps {
+                sshagent(['staging']) {
+                    script {
+                        try {
+                            sh """ssh -o StrictHostKeyChecking=no ${env.SERVER} << EOF
+                            trivy image ${env.IMAGE} > trivy_report.txt
+                            cat trivy_report.txt
+                            exit
+                            EOF"""
+                            notifyDiscord("Trivy scan completed successfully for **${env.IMAGE}**. No critical vulnerabilities found.")
+                        } catch (Exception e) {
+                            notifyDiscord("Trivy scan failed for **${env.IMAGE}**: Found critical vulnerabilities. Check logs!")
+                            error("Security scan failed")
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Push to Docker Hub') {
+            steps {
+                sshagent(['staging']) {
+                    script {
+                        try {
+                            sh """ssh -o StrictHostKeyChecking=no ${env.SERVER} << EOF
+                            docker push ${env.IMAGE}
+                            exit
+                            EOF"""
+                            notifyDiscord("Docker push successful for **${env.IMAGE}**")
+                        } catch (Exception e) {
+                            notifyDiscord("Docker push failed for **${env.IMAGE}**: ${e.message}")
+                            error("Push failed")
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Deploy Frontend') {
+            steps {
+                sshagent(['staging']) {
+                    script {
+                        try {
+                            sh """ssh -o StrictHostKeyChecking=no ${env.SERVER} << EOF
+                            cd ${env.DIRECTORY}
+                            if [ \$(docker ps -q -f name=${env.CONTAINER}) ]; then
+                                docker compose down ${env.CONTAINER}
+                            fi
+                            docker compose up --build -d
+                            exit
+                            EOF"""
+                            notifyDiscord("Frontend deployment successful for **${env.IMAGE}**")
+                        } catch (Exception e) {
+                            notifyDiscord("Frontend deployment failed for **${env.IMAGE}**: ${e.message}")
+                            error("Deployment failed")
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            script {
+                notifyDiscord("Frontend deployment completed successfully!")
+            }
+        }
+        failure {
+            script {
+                notifyDiscord("Deployment encountered errors. Check logs!")
+            }
+        }
+    }
+}
+
+// Function to send notifications to Discord
+def notifyDiscord(String message) {
+    def payload = """
+    {
+        "content": "${message}"
+    }
+    """
+    httpRequest(
+        url: env.DISCORD_WEBHOOK,  // Ambil dari environment variable
+        httpMode: 'POST',
+        contentType: 'APPLICATION_JSON',
+        requestBody: payload
+    )
+}
