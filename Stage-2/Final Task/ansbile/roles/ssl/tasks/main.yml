@@ -62,31 +62,27 @@
   command: /opt/certbot-venv/bin/python -m pip install --upgrade pip
   become: yes
 
-# Hapus Cloudflare SDK versi lama secara paksa
-- name: Hapus Cloudflare SDK versi lama secara paksa
+# Hapus Cloudflare SDK secara paksa jika tidak terdeteksi
+- name: Hapus Cloudflare SDK jika tidak ditemukan
   command: /opt/certbot-venv/bin/pip uninstall -y cloudflare
   ignore_errors: yes
   become: yes
 
-# Install ulang Cloudflare SDK versi terbaru dengan metode paksa
-- name: Install Cloudflare SDK terbaru dengan metode paksa
+# Install ulang Cloudflare SDK dengan metode paksa
+- name: Install ulang Cloudflare SDK dalam virtual environment
   command: /opt/certbot-venv/bin/pip install --no-cache-dir --force-reinstall cloudflare
   become: yes
 
-# Install ulang certbot-dns-cloudflare
-- name: Install ulang certbot-dns-cloudflare
-  command: /opt/certbot-venv/bin/pip install --no-cache-dir --force-reinstall certbot-dns-cloudflare
-  become: yes
-
-# Periksa ulang versi Cloudflare SDK setelah update
-- name: Periksa ulang versi Cloudflare SDK setelah update
+# Periksa apakah Cloudflare SDK sudah bisa digunakan
+- name: Verifikasi instalasi Cloudflare SDK dalam Virtual Environment
   command: /opt/certbot-venv/bin/python -c "import cloudflare; print(cloudflare.__version__)"
   register: cloudflare_version_check
   changed_when: false
+  ignore_errors: no
   become: yes
 
 - debug:
-    msg: "Versi terbaru Cloudflare SDK: {{ cloudflare_version_check.stdout }}"
+    msg: "Cloudflare SDK Version: {{ cloudflare_version_check.stdout }}"
 
 # Pastikan API Token Cloudflare tersimpan dengan benar
 - name: Pastikan API Token Cloudflare tersimpan dengan benar
