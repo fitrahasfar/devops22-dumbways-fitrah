@@ -7,44 +7,44 @@
       state: present
       update_cache: yes
 
-  # Pastikan Python3 dan dependensinya tersedia
-  - name: Install Python3 dan dependensinya
-    apt:
-      name:
-        - python3
-        - python3-pip
-        - python3-venv
-      state: present
-      update_cache: yes
-
   # Install Certbot via Snap
   - name: Install Certbot melalui Snap
-    command: sudo snap install --classic certbot
+    command: snap install --classic certbot
     args:
       creates: /snap/bin/certbot
 
-  # Berikan izin ke Certbot untuk menggunakan plugin dengan root
-  - name: Set Certbot agar dapat menggunakan plugin dengan root
-    command: sudo snap set certbot trust-plugin-with-root=ok
-
-  # Buat Symlink agar Certbot bisa diakses dari `/usr/bin`
+  # Buat Symlink agar Certbot bisa diakses via `/usr/bin`
   - name: Pastikan Certbot dapat diakses dari `/usr/bin`
     file:
       src: /snap/bin/certbot
       dest: /usr/bin/certbot
       state: link
-    ignore_errors: yes
+    ignore_errors: yes  # Jika sudah ada, abaikan error
+
+  # Berikan izin ke Certbot untuk menggunakan plugin dengan root
+  - name: Set Certbot agar dapat menggunakan plugin dengan root
+    command: snap set certbot trust-plugin-with-root=ok
 
   # Install Plugin Cloudflare untuk Certbot
   - name: Install plugin Cloudflare untuk Certbot
-    command: sudo snap install certbot-dns-cloudflare
+    command: snap install certbot-dns-cloudflare
+    args:
+      creates: /snap/bin/certbot-dns-cloudflare
 
-  # Pastikan Cloudflare Python SDK versi terbaru
-  - name: Perbarui Cloudflare Python SDK
-    command: python3 -m pip install --upgrade --force-reinstall cloudflare
-    environment:
-      PIP_BREAK_SYSTEM_PACKAGES: "1"
-    ignore_errors: no
+  # Update Cloudflare Python SDK sebelum menjalankan Certbot
+  - name: Update Cloudflare Python SDK
+    pip:
+      name: cloudflare
+      state: latest
+
+  # Cek versi Cloudflare SDK setelah update
+  - name: Periksa versi Cloudflare SDK setelah update
+    shell: pip show cloudflare | grep Version
+    register: cloudflare_version_check
+    changed_when: false
+
+  - debug:
+      msg: "Cloudflare SDK Version: {{ cloudflare_version_check.stdout }}"
 
   # Pastikan API Token Cloudflare tersimpan dengan benar
   - name: Pastikan API Token Cloudflare tersimpan dengan benar
@@ -52,16 +52,6 @@
       src: cloudflare.ini.j2
       dest: /root/cloudflare.ini
       mode: '0600'
-
-  # Verifikasi API Token Cloudflare sebelum menjalankan Certbot
-  - name: Cek validitas API Token Cloudflare
-    command: cat /root/cloudflare.ini
-    register: cloudflare_api_check
-
-  - name: Gagal jika API Token tidak valid
-    fail:
-      msg: "API Token Cloudflare tidak valid atau tidak ditemukan di /root/cloudflare.ini. Harap periksa kembali."
-    when: cloudflare_api_check.stdout is not search("dns_cloudflare_api_token")
 
   # Pastikan direktori sertifikat ada sebelum generate SSL
   - name: Pastikan direktori sertifikat ada sebelum generate SSL
@@ -97,3 +87,19 @@
       name: "Renew SSL Certificate"
       job: "/usr/bin/certbot renew --quiet --dns-cloudflare --dns-cloudflare-credentials /root/cloudflare.ini"
       state: present
+
+  # Pastikan konfigurasi Nginx valid sebelum restart
+  # - name: Pastikan konfigurasi Nginx valid sebelum restart
+  #   become: yes
+  #   command: nginx -t
+  #   register: nginx_config_check
+  #   changed_when: nginx_config_check.rc != 0
+  #   failed_when: nginx_config_check.rc != 0
+
+  # # Restart Nginx untuk menerapkan SSL
+  # - name: Restart Nginx untuk menerapkan SSL
+  #   become: yes
+  #   service:
+  #     name: nginx
+  #     state: restarted
+  #   when: nginx_config_check.rc == 0
