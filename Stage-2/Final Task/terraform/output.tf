@@ -1,15 +1,27 @@
-output "ubuntu_internal_ip" {
-  value = google_compute_instance.ubuntu_server.network_interface[0].network_ip
+# Bastion ip
+output "bastion_internal_ip" {
+  value = google_compute_instance.bastion_server.network_interface[0].network_ip
 }
 
-output "ubuntu_external_ip" {
-  value = google_compute_instance.ubuntu_server.network_interface[0].access_config[0].nat_ip
+output "bastion_external_ip" {
+  value = google_compute_instance.bastion_server.network_interface[0].access_config[0].nat_ip
 }
 
-output "debian_internal_ip" {
-  value = google_compute_instance.debian-server.network_interface[0].network_ip
+# Staging ip
+
+output "staging_internal_ip" {
+  value = google_compute_instance.staging_server.network_interface[0].network_ip
 }
 
-output "debian_external_ip" {
-  value = google_compute_instance.debian-server.network_interface[0].access_config[0].nat_ip
+output "staging_external_ip" {
+  value = google_compute_instance.staging_server.network_interface[0].access_config[0].nat_ip
+}
+
+# Production ip
+output "production_internal_ip" {
+  value = google_compute_instance.production-server.network_interface[0].network_ip
+}
+
+output "production_external_ip" {
+  value = google_compute_instance.production-server.network_interface[0].access_config[0].nat_ip
 }
