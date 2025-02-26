@@ -32,16 +32,16 @@
       creates: /snap/bin/certbot-dns-cloudflare
 
   # Update Cloudflare Python SDK sebelum menjalankan Certbot
-  - name: Update Cloudflare Python SDK
-    pip:
-      name: cloudflare
-      state: latest
+  # - name: Update Cloudflare Python SDK
+  #   pip:
+  #     name: cloudflare
+  #     state: latest
 
   # Cek versi Cloudflare SDK setelah update
-  - name: Periksa versi Cloudflare SDK setelah update
-    shell: pip show cloudflare | grep Version
-    register: cloudflare_version_check
-    changed_when: false
+  # - name: Periksa versi Cloudflare SDK setelah update
+  #   shell: pip show cloudflare | grep Version
+  #   register: cloudflare_version_check
+  #   changed_when: false
 
   - debug:
       msg: "Cloudflare SDK Version: {{ cloudflare_version_check.stdout }}"
@@ -89,12 +89,12 @@
       state: present
 
   # Pastikan konfigurasi Nginx valid sebelum restart
-  - name: Pastikan konfigurasi Nginx valid sebelum restart
-    become: yes
-    command: nginx -t
-    register: nginx_config_check
-    changed_when: nginx_config_check.rc != 0
-    failed_when: nginx_config_check.rc != 0
+  # - name: Pastikan konfigurasi Nginx valid sebelum restart
+  #   become: yes
+  #   command: nginx -t
+  #   register: nginx_config_check
+  #   changed_when: nginx_config_check.rc != 0
+  #   failed_when: nginx_config_check.rc != 0
 
   # Restart Nginx untuk menerapkan SSL
   # - name: Restart Nginx untuk menerapkan SSL
