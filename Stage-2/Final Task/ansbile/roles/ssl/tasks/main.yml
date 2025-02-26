@@ -4,31 +4,65 @@
     name: snapd
     state: present
     update_cache: yes
+  become: yes
 
 - name: Install Certbot melalui Snap
   command: snap install --classic certbot
+  args:
+    creates: /snap/bin/certbot
+  become: yes
 
 - name: Pastikan Certbot dapat diakses dari `/usr/bin`
   file:
     src: /snap/bin/certbot
     dest: /usr/bin/certbot
     state: link
+  ignore_errors: yes
+  become: yes
 
 - name: Set Certbot agar dapat menggunakan plugin dengan root
   command: snap set certbot trust-plugin-with-root=ok
+  become: yes
 
 - name: Install plugin Cloudflare untuk Certbot
   command: snap install certbot-dns-cloudflare
+  args:
+    creates: /snap/bin/certbot-dns-cloudflare
+  become: yes
 
-# 📌 Update & Install Cloudflare Python SDK sebelum menjalankan Certbot
-- name: Update Cloudflare Python SDK
-  pip:
-    name: cloudflare
-    state: latest
+# 📌 **Pastikan Virtual Environment dibuat untuk Python**
+- name: Pastikan paket python3-venv dan python3-pip sudah terinstal
+  apt:
+    name:
+      - python3-venv
+      - python3-pip
+    state: present
+  become: yes
 
-# 📌 Cek versi Cloudflare SDK setelah update
+- name: Buat virtual environment untuk Certbot
+  command: python3 -m venv /opt/certbot-venv
+  args:
+    creates: /opt/certbot-venv
+  become: yes
+
+- name: Pastikan pip tersedia dalam virtual environment
+  command: /opt/certbot-venv/bin/python -m ensurepip --default-pip
+  args:
+    creates: /opt/certbot-venv/bin/pip
+  become: yes
+
+- name: Upgrade pip dalam virtual environment
+  command: /opt/certbot-venv/bin/python -m pip install --upgrade pip
+  become: yes
+
+# 📌 **Install Cloudflare SDK di dalam Virtual Environment**
+- name: Install atau update Cloudflare SDK dalam virtual environment
+  command: /opt/certbot-venv/bin/pip install -U cloudflare certbot-dns-cloudflare
+  become: yes
+
+# 📌 **Cek versi Cloudflare SDK setelah update**
 - name: Periksa versi Cloudflare SDK setelah update
-  shell: pip show cloudflare | grep Version
+  command: /opt/certbot-venv/bin/pip show cloudflare | grep Version
   register: cloudflare_version_check
   changed_when: false
 
@@ -40,6 +74,7 @@
     src: cloudflare.ini.j2
     dest: /root/cloudflare.ini
     mode: '0600'
+  become: yes
 
 - name: Pastikan direktori sertifikat ada sebelum generate SSL
   file:
@@ -47,10 +82,12 @@
     state: directory
     mode: '0755'
   ignore_errors: yes
+  become: yes
 
+# 📌 **Gunakan Virtual Environment untuk Certbot**
 - name: Generate Wildcard SSL Certificate menggunakan Cloudflare DNS Challenge
   command: >
-    certbot certonly --dns-cloudflare
+    /opt/certbot-venv/bin/certbot certonly --dns-cloudflare
     --dns-cloudflare-credentials /root/cloudflare.ini
     --email {{ email_ssl }}
     --agree-tos --no-eff-email
@@ -58,8 +95,9 @@
     -d {{ domain_name }} -d *.{{ domain_name }}
   args:
     creates: "/etc/letsencrypt/live/{{ domain_name }}/fullchain.pem"
-  ignore_errors: no
   register: ssl_output
+  ignore_errors: no
+  become: yes
 
 - name: Tampilkan hasil eksekusi Certbot jika terjadi error
   debug:
@@ -69,5 +107,6 @@
 - name: Set otomatisasi pembaruan sertifikat SSL
   cron:
     name: "Renew SSL Certificate"
-    job: "certbot renew --quiet --dns-cloudflare --dns-cloudflare-credentials /root/cloudflare.ini"
+    job: "/opt/certbot-venv/bin/certbot renew --quiet --dns-cloudflare --dns-cloudflare-credentials /root/cloudflare.ini"
     state: present
+  become: yes
