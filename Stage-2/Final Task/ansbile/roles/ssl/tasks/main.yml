@@ -31,9 +31,11 @@
   become: yes
 
 # **Solusi Python 3.12: Buat Virtual Environment untuk Cloudflare SDK**
-- name: Pastikan paket python3-venv sudah terinstal
+- name: Pastikan paket python3-venv dan python3-pip sudah terinstal
   apt:
-    name: python3-venv
+    name:
+      - python3-venv
+      - python3-pip
     state: present
   become: yes
 
@@ -41,6 +43,16 @@
   command: python3 -m venv /opt/certbot-venv
   args:
     creates: /opt/certbot-venv
+  become: yes
+
+- name: Pastikan pip tersedia dalam virtual environment
+  command: /opt/certbot-venv/bin/python -m ensurepip
+  args:
+    creates: /opt/certbot-venv/bin/pip
+  become: yes
+
+- name: Upgrade pip dalam virtual environment
+  command: /opt/certbot-venv/bin/pip install --upgrade pip
   become: yes
 
 - name: Install atau update Cloudflare SDK dalam virtual environment
