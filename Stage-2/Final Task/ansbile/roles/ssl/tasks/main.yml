@@ -30,7 +30,6 @@
     creates: /snap/bin/certbot-dns-cloudflare
   become: yes
 
-# 📌 **Pastikan Virtual Environment dibuat untuk Python**
 - name: Pastikan paket python3-venv dan python3-pip sudah terinstal
   apt:
     name:
@@ -55,23 +54,19 @@
   command: /opt/certbot-venv/bin/python -m pip install --upgrade pip
   become: yes
 
-# 📌 **Hapus Cloudflare SDK versi lama sebelum update**
 - name: Hapus Cloudflare SDK versi lama
   command: /opt/certbot-venv/bin/pip uninstall -y cloudflare
   ignore_errors: yes
   become: yes
 
-# 📌 **Install ulang Cloudflare SDK versi terbaru**
 - name: Install Cloudflare SDK terbaru tanpa cache
   command: /opt/certbot-venv/bin/pip install --no-cache-dir --upgrade cloudflare
   become: yes
 
-# 📌 **Pastikan certbot-dns-cloudflare juga diperbarui**
 - name: Install ulang certbot-dns-cloudflare
   command: /opt/certbot-venv/bin/pip install --no-cache-dir --upgrade certbot-dns-cloudflare
   become: yes
 
-# 📌 **Cek versi Cloudflare SDK setelah update**
 - name: Periksa versi Cloudflare SDK setelah update
   command: /opt/certbot-venv/bin/pip show cloudflare | grep Version
   register: cloudflare_version_check
@@ -80,7 +75,6 @@
 - debug:
     msg: "Cloudflare SDK Version: {{ cloudflare_version_check.stdout }}"
 
-# 📌 **Pastikan API Token Cloudflare tersimpan dengan benar**
 - name: Pastikan API Token Cloudflare tersimpan dengan benar
   template:
     src: cloudflare.ini.j2
@@ -103,7 +97,6 @@
     msg: "Isi cloudflare.ini: {{ cloudflare_ini_content.stdout }}"
   when: cloudflare_ini_check.stat.exists
 
-# 📌 **Pastikan direktori sertifikat ada sebelum generate SSL**
 - name: Pastikan direktori sertifikat ada sebelum generate SSL
   file:
     path: "/etc/letsencrypt/live/{{ domain_name }}"
@@ -112,7 +105,6 @@
   ignore_errors: yes
   become: yes
 
-# 📌 **Gunakan Virtual Environment untuk Certbot**
 - name: Generate Wildcard SSL Certificate menggunakan Cloudflare DNS Challenge
   command: >
     /opt/certbot-venv/bin/certbot certonly --dns-cloudflare
