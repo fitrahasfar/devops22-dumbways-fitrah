@@ -1,105 +1,97 @@
 ---
+- name: Install Snapd
+  apt:
+    name: snapd
+    state: present
+    update_cache: yes
+  become: yes  # Jalankan sebagai root
 
-  # Pastikan Snapd Terinstal
-  - name: Install Snapd
-    apt:
-      name: snapd
-      state: present
-      update_cache: yes
+- name: Install Certbot melalui Snap
+  command: snap install --classic certbot
+  args:
+    creates: /snap/bin/certbot
+  become: yes
 
-  # Install Certbot via Snap
-  - name: Install Certbot melalui Snap
-    command: snap install --classic certbot
-    args:
-      creates: /snap/bin/certbot
+- name: Pastikan Certbot dapat diakses dari `/usr/bin`
+  file:
+    src: /snap/bin/certbot
+    dest: /usr/bin/certbot
+    state: link
+  ignore_errors: yes
+  become: yes
 
-  # Buat Symlink agar Certbot bisa diakses via `/usr/bin`
-  - name: Pastikan Certbot dapat diakses dari `/usr/bin`
-    file:
-      src: /snap/bin/certbot
-      dest: /usr/bin/certbot
-      state: link
-    ignore_errors: yes  # Jika sudah ada, abaikan error
+- name: Set Certbot agar dapat menggunakan plugin dengan root
+  command: snap set certbot trust-plugin-with-root=ok
+  become: yes
 
-  # Berikan izin ke Certbot untuk menggunakan plugin dengan root
-  - name: Set Certbot agar dapat menggunakan plugin dengan root
-    command: snap set certbot trust-plugin-with-root=ok
+- name: Install plugin Cloudflare untuk Certbot
+  command: snap install certbot-dns-cloudflare
+  args:
+    creates: /snap/bin/certbot-dns-cloudflare
+  become: yes
 
-  # Install Plugin Cloudflare untuk Certbot
-  - name: Install plugin Cloudflare untuk Certbot
-    command: snap install certbot-dns-cloudflare
-    args:
-      creates: /snap/bin/certbot-dns-cloudflare
+# **Solusi Python 3.12: Buat Virtual Environment untuk Cloudflare SDK**
+- name: Pastikan paket python3-venv sudah terinstal
+  apt:
+    name: python3-venv
+    state: present
+  become: yes
 
-  # Update Cloudflare Python SDK sebelum menjalankan Certbot
-  - name: Update Cloudflare Python SDK
-    pip:
-      name: cloudflare
-      state: latest
+- name: Buat virtual environment untuk Certbot
+  command: python3 -m venv /opt/certbot-venv
+  args:
+    creates: /opt/certbot-venv
+  become: yes
 
-  # Cek versi Cloudflare SDK setelah update
-  - name: Periksa versi Cloudflare SDK setelah update
-    shell: pip show cloudflare | grep Version
-    register: cloudflare_version_check
-    changed_when: false
+- name: Install atau update Cloudflare SDK dalam virtual environment
+  command: /opt/certbot-venv/bin/pip install -U cloudflare
+  become: yes
 
-  - debug:
-      msg: "Cloudflare SDK Version: {{ cloudflare_version_check.stdout }}"
+- name: Periksa versi Cloudflare SDK setelah update
+  command: /opt/certbot-venv/bin/pip show cloudflare | grep Version
+  register: cloudflare_version_check
+  changed_when: false
 
-  # Pastikan API Token Cloudflare tersimpan dengan benar
-  - name: Pastikan API Token Cloudflare tersimpan dengan benar
-    template:
-      src: cloudflare.ini.j2
-      dest: /root/cloudflare.ini
-      mode: '0600'
+- debug:
+    msg: "Cloudflare SDK Version: {{ cloudflare_version_check.stdout }}"
 
-  # Pastikan direktori sertifikat ada sebelum generate SSL
-  - name: Pastikan direktori sertifikat ada sebelum generate SSL
-    file:
-      path: "/etc/letsencrypt/live/{{ domain_name }}"
-      state: directory
-      mode: '0755'
-    ignore_errors: yes
+- name: Pastikan API Token Cloudflare tersimpan dengan benar
+  template:
+    src: cloudflare.ini.j2
+    dest: /root/cloudflare.ini
+    mode: '0600'
+  become: yes
 
-  # Generate Wildcard SSL Certificate menggunakan Cloudflare DNS Challenge
-  - name: Generate Wildcard SSL Certificate menggunakan Cloudflare DNS Challenge
-    command: >
-      certbot certonly --dns-cloudflare
-      --dns-cloudflare-credentials /root/cloudflare.ini
-      --email {{ email_ssl }}
-      --agree-tos --no-eff-email
-      --server https://acme-v02.api.letsencrypt.org/directory
-      -d {{ domain_name }} -d *.{{ domain_name }}
-    args:
-      creates: "/etc/letsencrypt/live/{{ domain_name }}/fullchain.pem"
-    register: ssl_output
-    ignore_errors: no
+- name: Pastikan direktori sertifikat ada sebelum generate SSL
+  file:
+    path: "/etc/letsencrypt/live/{{ domain_name }}"
+    state: directory
+    mode: '0755'
+  ignore_errors: yes
+  become: yes
 
-  # Tampilkan error jika ada kegagalan pada proses Certbot
-  - name: Tampilkan hasil eksekusi Certbot jika terjadi error
-    debug:
-      var: ssl_output.stderr_lines
-    when: ssl_output.rc != 0
+- name: Generate Wildcard SSL Certificate menggunakan Cloudflare DNS Challenge
+  command: >
+    certbot certonly --dns-cloudflare
+    --dns-cloudflare-credentials /root/cloudflare.ini
+    --email {{ email_ssl }}
+    --agree-tos --no-eff-email
+    --server https://acme-v02.api.letsencrypt.org/directory
+    -d {{ domain_name }} -d *.{{ domain_name }}
+  args:
+    creates: "/etc/letsencrypt/live/{{ domain_name }}/fullchain.pem"
+  register: ssl_output
+  ignore_errors: no
+  become: yes
 
-  # Set otomatisasi pembaruan sertifikat SSL
-  - name: Set otomatisasi pembaruan sertifikat SSL
-    cron:
-      name: "Renew SSL Certificate"
-      job: "/usr/bin/certbot renew --quiet --dns-cloudflare --dns-cloudflare-credentials /root/cloudflare.ini"
-      state: present
+- name: Tampilkan hasil eksekusi Certbot jika terjadi error
+  debug:
+    var: ssl_output.stderr_lines
+  when: ssl_output.rc != 0
 
-  # Pastikan konfigurasi Nginx valid sebelum restart
-  # - name: Pastikan konfigurasi Nginx valid sebelum restart
-  #   become: yes
-  #   command: nginx -t
-  #   register: nginx_config_check
-  #   changed_when: nginx_config_check.rc != 0
-  #   failed_when: nginx_config_check.rc != 0
-
-  # # Restart Nginx untuk menerapkan SSL
-  # - name: Restart Nginx untuk menerapkan SSL
-  #   become: yes
-  #   service:
-  #     name: nginx
-  #     state: restarted
-  #   when: nginx_config_check.rc == 0
+- name: Set otomatisasi pembaruan sertifikat SSL
+  cron:
+    name: "Renew SSL Certificate"
+    job: "/usr/bin/certbot renew --quiet --dns-cloudflare --dns-cloudflare-credentials /root/cloudflare.ini"
+    state: present
+  become: yes
