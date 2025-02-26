@@ -45,8 +45,8 @@
       creates: /opt/certbot-venv
 
   # Instal Cloudflare SDK dalam Virtual Environment
-  - name: Instal Cloudflare SDK dalam Virtual Environment
-    command: /opt/certbot-venv/bin/pip install -U cloudflare
+  # - name: Instal Cloudflare SDK dalam Virtual Environment
+  #   command: /opt/certbot-venv/bin/pip install -U cloudflare
 
   # Pastikan API Token Cloudflare tersimpan dengan benar
   - name: Pastikan API Token Cloudflare tersimpan dengan benar
