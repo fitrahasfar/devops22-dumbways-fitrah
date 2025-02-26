@@ -7,5 +7,5 @@
     - docker
     - jenkins
     - monitoring
-    - nginx
     - ssl
+    - nginx
