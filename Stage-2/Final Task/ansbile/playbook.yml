@@ -3,9 +3,9 @@
   hosts: all
   become: yes
   roles:
+    - ssl
     - common
     - docker
     - jenkins
     - monitoring
-    - ssl
     - nginx
