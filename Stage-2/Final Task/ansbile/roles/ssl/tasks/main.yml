@@ -4,7 +4,7 @@
     name: snapd
     state: present
     update_cache: yes
-  become: yes  # Jalankan sebagai root
+  become: yes
 
 - name: Install Certbot melalui Snap
   command: snap install --classic certbot
@@ -53,29 +53,17 @@
     creates: /opt/certbot-venv/bin/pip
   become: yes
 
-# **Verifikasi apakah pip tersedia di dalam venv**
-- name: Cek apakah pip tersedia di dalam virtual environment
-  stat:
-    path: /opt/certbot-venv/bin/pip
-  register: pip_check
-
-# **Jika pip tidak tersedia, jalankan ulang ensurepip**
-- name: Jalankan ulang ensurepip jika pip tidak tersedia
-  command: /opt/certbot-venv/bin/python -m ensurepip --default-pip
-  when: not pip_check.stat.exists
-  become: yes
-
 # **Upgrade pip dalam virtual environment**
 - name: Upgrade pip dalam virtual environment
   command: /opt/certbot-venv/bin/python -m pip install --upgrade pip
   become: yes
 
-# **Install atau update Cloudflare SDK dalam virtual environment**
+# **Pastikan Certbot menggunakan Cloudflare SDK terbaru**
 - name: Install atau update Cloudflare SDK dalam virtual environment
-  command: /opt/certbot-venv/bin/pip install -U cloudflare
+  command: /opt/certbot-venv/bin/pip install -U cloudflare certbot-dns-cloudflare
   become: yes
 
-# **Periksa versi Cloudflare SDK setelah update**
+# **Verifikasi versi Cloudflare SDK setelah update**
 - name: Periksa versi Cloudflare SDK setelah update
   command: /opt/certbot-venv/bin/pip show cloudflare | grep Version
   register: cloudflare_version_check
@@ -84,21 +72,31 @@
 - debug:
     msg: "Cloudflare SDK Version: {{ cloudflare_version_check.stdout }}"
 
-- name: Pastikan API Token Cloudflare tersimpan dengan benar
+# **Pastikan API Token Cloudflare tersimpan dengan benar**
+- name: Simpan API Token Cloudflare dengan izin yang benar
   template:
     src: cloudflare.ini.j2
     dest: /root/cloudflare.ini
     mode: '0600'
   become: yes
 
-- name: Pastikan direktori sertifikat ada sebelum generate SSL
-  file:
-    path: "/etc/letsencrypt/live/{{ domain_name }}"
-    state: directory
-    mode: '0755'
-  ignore_errors: yes
-  become: yes
+# **Verifikasi isi file Cloudflare API Token**
+- name: Cek apakah file Cloudflare API Token ada dan memiliki isi
+  stat:
+    path: /root/cloudflare.ini
+  register: cloudflare_ini_check
 
+- name: Tampilkan isi cloudflare.ini untuk verifikasi (jika ada masalah)
+  command: cat /root/cloudflare.ini
+  register: cloudflare_ini_content
+  when: cloudflare_ini_check.stat.exists
+  changed_when: false
+
+- debug:
+    msg: "Isi cloudflare.ini: {{ cloudflare_ini_content.stdout }}"
+  when: cloudflare_ini_check.stat.exists
+
+# **Generate Wildcard SSL Certificate menggunakan Cloudflare DNS Challenge**
 - name: Generate Wildcard SSL Certificate menggunakan Cloudflare DNS Challenge
   command: >
     certbot certonly --dns-cloudflare
