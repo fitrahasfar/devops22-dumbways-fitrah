@@ -53,6 +53,12 @@ resource "google_compute_address" "static_ip_bastion" {
   region = var.region
 }
 
+# Static IP address Jenkins and Monitoring
+resource "google_compute_address" "static_ip_jenkinsandmonitoring" {
+  name = "static-ip-jenkinsandmonitoring"
+  region = var.region
+}
+
 # Static IP address Staging
 resource "google_compute_address" "static_ip_staging" {
   name = "static-ip-staging"
@@ -81,6 +87,28 @@ resource "google_compute_instance" "bastion_server" {
     network = google_compute_network.vpc_network.id
     access_config {
       nat_ip = google_compute_address.static_ip_bastion.address
+    }
+  }
+
+  tags = ["allow-ssh", "allow-http", "allow-icmp"]
+}
+
+# Jenkins and Monitoring VM
+resource "google_compute_instance" "jenkinsandmonitoring_server" {
+  name = "jenkinsandmonitoring-server"
+  machine_type = var.machine-type
+  zone = var.zone
+
+  boot_disk {
+    initialize_params {
+      image = "ubuntu-os-cloud/ubuntu-2404-noble-amd64-v20250117"
+    }
+  }
+
+  network_interface {
+    network = google_compute_network.vpc_network.id
+    access_config {
+      nat_ip = google_compute_address.static_ip_jenkinsandmonitoring.address
     }
   }
 

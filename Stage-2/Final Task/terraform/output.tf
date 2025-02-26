@@ -7,6 +7,16 @@ output "bastion_external_ip" {
   value = google_compute_instance.bastion_server.network_interface[0].access_config[0].nat_ip
 }
 
+# Jenskins and Monitoring ip
+output "jenkinsandmonitoring_internal_ip" {
+  value = google_compute_instance.jenkinsandmonitoring_server.network_interface[0].network_ip
+}
+
+output "jenkinsandmonitoring_external_ip" {
+  value = google_compute_instance.jenkinsandmonitoring_server.network_interface[0].access_config[0].nat_ip
+}
+
+
 # Staging ip
 
 output "staging_internal_ip" {
