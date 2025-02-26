@@ -55,9 +55,9 @@
   command: /opt/certbot-venv/bin/python -m pip install --upgrade pip
   become: yes
 
-# 📌 **Install Cloudflare SDK di dalam Virtual Environment**
+# 📌 **Update Cloudflare SDK ke versi terbaru**
 - name: Install atau update Cloudflare SDK dalam virtual environment
-  command: /opt/certbot-venv/bin/pip install -U cloudflare certbot-dns-cloudflare
+  command: /opt/certbot-venv/bin/pip install --upgrade cloudflare certbot-dns-cloudflare
   become: yes
 
 # 📌 **Cek versi Cloudflare SDK setelah update**
@@ -69,6 +69,7 @@
 - debug:
     msg: "Cloudflare SDK Version: {{ cloudflare_version_check.stdout }}"
 
+# 📌 **Verifikasi API Token Cloudflare**
 - name: Pastikan API Token Cloudflare tersimpan dengan benar
   template:
     src: cloudflare.ini.j2
@@ -76,6 +77,22 @@
     mode: '0600'
   become: yes
 
+- name: Cek apakah file Cloudflare API Token ada dan memiliki isi
+  stat:
+    path: /root/cloudflare.ini
+  register: cloudflare_ini_check
+
+- name: Tampilkan isi cloudflare.ini untuk verifikasi (hanya jika ada masalah)
+  command: cat /root/cloudflare.ini
+  register: cloudflare_ini_content
+  when: cloudflare_ini_check.stat.exists
+  changed_when: false
+
+- debug:
+    msg: "Isi cloudflare.ini: {{ cloudflare_ini_content.stdout }}"
+  when: cloudflare_ini_check.stat.exists
+
+# 📌 **Pastikan direktori sertifikat ada sebelum generate SSL**
 - name: Pastikan direktori sertifikat ada sebelum generate SSL
   file:
     path: "/etc/letsencrypt/live/{{ domain_name }}"
