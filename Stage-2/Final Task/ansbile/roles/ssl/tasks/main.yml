@@ -29,11 +29,15 @@
   - name: Install plugin Cloudflare untuk Certbot
     command: sudo snap install certbot-dns-cloudflare
 
-  # Pastikan Cloudflare Python SDK Terupdate
-  - name: Pastikan Cloudflare Python SDK versi terbaru
-    pip:
-      name: cloudflare
-      state: latest
+  # Pastikan Virtual Environment sudah ada
+  - name: Pastikan Virtual Environment sudah ada
+    command: python3 -m venv /opt/certbot-venv
+    args:
+      creates: /opt/certbot-venv
+
+  # Instal Cloudflare SDK dalam Virtual Environment
+  - name: Instal Cloudflare SDK dalam Virtual Environment
+    command: /opt/certbot-venv/bin/pip install -U cloudflare
 
   # Pastikan API Token Cloudflare tersimpan dengan benar
   - name: Pastikan API Token Cloudflare tersimpan dengan benar
@@ -53,7 +57,7 @@
   # Generate Wildcard SSL Certificate menggunakan Cloudflare DNS Challenge
   - name: Generate Wildcard SSL Certificate menggunakan Cloudflare DNS Challenge
     command: >
-      certbot certonly --dns-cloudflare
+      /opt/certbot-venv/bin/certbot certonly --dns-cloudflare
       --dns-cloudflare-credentials /root/cloudflare.ini
       --email {{ email_ssl }}
       --agree-tos --no-eff-email
@@ -74,5 +78,5 @@
   - name: Set otomatisasi pembaruan sertifikat SSL
     cron:
       name: "Renew SSL Certificate"
-      job: "/usr/bin/certbot renew --quiet --dns-cloudflare --dns-cloudflare-credentials /root/cloudflare.ini"
+      job: "/opt/certbot-venv/bin/certbot renew --quiet --dns-cloudflare --dns-cloudflare-credentials /root/cloudflare.ini"
       state: present
