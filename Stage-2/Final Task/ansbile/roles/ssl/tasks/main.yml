@@ -13,21 +13,27 @@
     args:
       creates: /snap/bin/certbot
 
+  # Berikan izin ke Certbot untuk menggunakan plugin dengan root
+  - name: Set Certbot agar dapat menggunakan plugin dengan root
+    command: sudo snap set certbot trust-plugin-with-root=ok
+
   # Buat Symlink agar Certbot bisa diakses via `/usr/bin`
   - name: Pastikan Certbot dapat diakses dari `/usr/bin`
     file:
       src: /snap/bin/certbot
       dest: /usr/bin/certbot
       state: link
-    ignore_errors: yes  # Jika sudah ada, abaikan error
-
-  # Berikan izin ke Certbot untuk menggunakan plugin dengan root
-  - name: Set Certbot agar dapat menggunakan plugin dengan root
-    command: sudo snap set certbot trust-plugin-with-root=ok
+    ignore_errors: yes
 
   # Install Plugin Cloudflare untuk Certbot
   - name: Install plugin Cloudflare untuk Certbot
     command: sudo snap install certbot-dns-cloudflare
+
+  # Pastikan Cloudflare Python SDK Terupdate
+  - name: Pastikan Cloudflare Python SDK versi terbaru
+    pip:
+      name: cloudflare
+      state: latest
 
   # Pastikan API Token Cloudflare tersimpan dengan benar
   - name: Pastikan API Token Cloudflare tersimpan dengan benar
