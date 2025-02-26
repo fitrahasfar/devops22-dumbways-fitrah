@@ -30,7 +30,7 @@
     creates: /snap/bin/certbot-dns-cloudflare
   become: yes
 
-# **Solusi Python 3.12: Buat Virtual Environment untuk Cloudflare SDK**
+# **Solusi Python 3.12: Pastikan paket python3-venv dan python3-pip sudah terinstal**
 - name: Pastikan paket python3-venv dan python3-pip sudah terinstal
   apt:
     name:
@@ -39,26 +39,43 @@
     state: present
   become: yes
 
+# **Buat Virtual Environment untuk Certbot**
 - name: Buat virtual environment untuk Certbot
   command: python3 -m venv /opt/certbot-venv
   args:
     creates: /opt/certbot-venv
   become: yes
 
+# **Pastikan pip tersedia dalam virtual environment**
 - name: Pastikan pip tersedia dalam virtual environment
-  command: /opt/certbot-venv/bin/python -m ensurepip
+  command: /opt/certbot-venv/bin/python -m ensurepip --default-pip
   args:
     creates: /opt/certbot-venv/bin/pip
   become: yes
 
-- name: Upgrade pip dalam virtual environment
-  command: /opt/certbot-venv/bin/pip install --upgrade pip
+# **Verifikasi apakah pip tersedia di dalam venv**
+- name: Cek apakah pip tersedia di dalam virtual environment
+  stat:
+    path: /opt/certbot-venv/bin/pip
+  register: pip_check
+
+# **Jika pip tidak tersedia, jalankan ulang ensurepip**
+- name: Jalankan ulang ensurepip jika pip tidak tersedia
+  command: /opt/certbot-venv/bin/python -m ensurepip --default-pip
+  when: not pip_check.stat.exists
   become: yes
 
+# **Upgrade pip dalam virtual environment**
+- name: Upgrade pip dalam virtual environment
+  command: /opt/certbot-venv/bin/python -m pip install --upgrade pip
+  become: yes
+
+# **Install atau update Cloudflare SDK dalam virtual environment**
 - name: Install atau update Cloudflare SDK dalam virtual environment
   command: /opt/certbot-venv/bin/pip install -U cloudflare
   become: yes
 
+# **Periksa versi Cloudflare SDK setelah update**
 - name: Periksa versi Cloudflare SDK setelah update
   command: /opt/certbot-venv/bin/pip show cloudflare | grep Version
   register: cloudflare_version_check
