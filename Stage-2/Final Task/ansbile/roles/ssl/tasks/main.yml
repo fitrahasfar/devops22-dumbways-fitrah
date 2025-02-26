@@ -43,8 +43,8 @@
   #   register: cloudflare_version_check
   #   changed_when: false
 
-  - debug:
-      msg: "Cloudflare SDK Version: {{ cloudflare_version_check.stdout }}"
+  # - debug:
+  #     msg: "Cloudflare SDK Version: {{ cloudflare_version_check.stdout }}"
 
   # Pastikan API Token Cloudflare tersimpan dengan benar
   - name: Pastikan API Token Cloudflare tersimpan dengan benar
