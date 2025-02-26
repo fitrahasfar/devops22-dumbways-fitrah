@@ -66,7 +66,7 @@
   # Generate Wildcard SSL Certificate menggunakan Cloudflare DNS Challenge
   - name: Generate Wildcard SSL Certificate menggunakan Cloudflare DNS Challenge
     command: >
-      /opt/certbot-venv/bin/certbot certonly --dns-cloudflare
+      certonly --dns-cloudflare
       --dns-cloudflare-credentials /root/cloudflare.ini
       --email {{ email_ssl }}
       --agree-tos --no-eff-email
