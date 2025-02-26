@@ -7,6 +7,15 @@
       state: present
       update_cache: yes
 
+  # Pastikan Python3 dan venv tersedia
+  - name: Install Python3 dan venv
+    apt:
+      name:
+        - python3
+        - python3-venv
+      state: present
+      update_cache: yes
+
   # Install Certbot via Snap
   - name: Install Certbot melalui Snap
     command: sudo snap install --classic certbot
