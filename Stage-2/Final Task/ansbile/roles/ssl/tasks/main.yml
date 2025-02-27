@@ -1,5 +1,3 @@
----
-
 # Install Certbot melalui Snap
 - name: Install Certbot via Snap
   command: sudo snap install --classic certbot
@@ -17,7 +15,6 @@
   command: sudo ln -s /snap/bin/certbot /usr/bin/certbot
   when: certbot_symlink_check.stat.exists == false
   become: yes
-
 
 # Setel Certbot agar dapat menggunakan plugin dengan root
 - name: Setel Certbot agar dapat menggunakan plugin dengan root
@@ -52,12 +49,20 @@
     mode: '0600'
   become: yes
 
-# Generate Wildcard SSL Certificate menggunakan Cloudflare DNS Challenge
+# Cek apakah sertifikat SSL sudah ada untuk domain
+- name: Cek apakah sertifikat SSL sudah ada untuk domain
+  stat:
+    path: "/etc/letsencrypt/live/{{ domain_name }}/fullchain.pem"
+  register: ssl_check
+  become: yes
+
+# Generate Wildcard SSL Certificate jika belum ada
 - name: Generate Wildcard SSL Certificate menggunakan Cloudflare DNS Challenge
   command: >
     sudo certbot certonly --dns-cloudflare
     --dns-cloudflare-credentials /root/.secret/cloudflare.ini
-    -d '*.fitrah.studentdumbways.my.id' -d 'fitrah.studentdumbways.my.id'
+    -d '*.{{ domain_name }}' -d '{{ domain_name }}' --agree-tos --email {{ email_ssl }} --no-eff-email
+  when: ssl_check.stat.exists == false
   become: yes
   register: ssl_output
 
@@ -66,4 +71,11 @@
   debug:
     var: ssl_output.stderr_lines
   when: ssl_output.rc != 0
+  become: yes
+
+# Tampilkan hasil sertifikat jika berhasil
+- name: Tampilkan hasil sertifikat SSL jika berhasil
+  debug:
+    msg: "Sertifikat SSL telah dibuat untuk domain: {{ domain_name }}"
+  when: ssl_output.rc == 0
   become: yes
