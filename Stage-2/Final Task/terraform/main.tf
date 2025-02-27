@@ -65,7 +65,7 @@ resource "google_compute_address" "static_ip_staging" {
   region = var.region
 }
 
-# Static IP address Debian
+# Static IP address Production
 resource "google_compute_address" "static_ip_production" {
   name = "static-ip-production"
   region = var.region
