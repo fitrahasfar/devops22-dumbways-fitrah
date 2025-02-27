@@ -5,10 +5,19 @@
   command: sudo snap install --classic certbot
   become: yes
 
-# Buat symlink untuk Certbot di /usr/bin
+# Cek apakah symlink Certbot sudah ada di /usr/bin
+- name: Cek apakah symlink Certbot sudah ada di /usr/bin
+  stat:
+    path: /usr/bin/certbot
+  register: certbot_symlink_check
+  become: yes
+
+# Buat symlink Certbot di /usr/bin jika belum ada
 - name: Buat symlink Certbot di /usr/bin
   command: sudo ln -s /snap/bin/certbot /usr/bin/certbot
+  when: certbot_symlink_check.stat.exists == false
   become: yes
+
 
 # Setel Certbot agar dapat menggunakan plugin dengan root
 - name: Setel Certbot agar dapat menggunakan plugin dengan root
