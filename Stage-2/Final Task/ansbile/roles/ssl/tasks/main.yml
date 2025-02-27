@@ -1,3 +1,4 @@
+---
 # Install Certbot melalui Snap
 - name: Install Certbot via Snap
   command: sudo snap install --classic certbot
@@ -70,7 +71,7 @@
 - name: Tampilkan hasil eksekusi Certbot jika terjadi error
   debug:
     var: ssl_output.stderr_lines
-  when: ssl_output.rc != 0
+  when: ssl_output is defined and ssl_output.rc != 0
   become: yes
 
 # Tampilkan hasil sertifikat jika berhasil
