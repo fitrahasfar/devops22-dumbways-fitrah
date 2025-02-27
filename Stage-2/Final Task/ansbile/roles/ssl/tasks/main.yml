@@ -66,13 +66,14 @@
   when: ssl_check.stat.exists == false
   become: yes
   register: ssl_output
-  ignore_errors: yes
+  failed_when: false  # Jangan menyebabkan task gagal meskipun ada error
+  changed_when: false  # Task ini tidak diindikasikan sebagai "changed" jika dilewati
 
-# Tampilkan hasil eksekusi Certbot jika terjadi error (hanya jika task berjalan)
+# Tampilkan hasil eksekusi Certbot jika terjadi error
 - name: Tampilkan hasil eksekusi Certbot jika terjadi error
   debug:
     var: ssl_output.stderr_lines
-  when: ssl_output is defined and ssl_output.rc != 0
+  when: ssl_output is defined and ssl_output.stderr_lines is defined and ssl_output.rc != 0
   become: yes
 
 # Tampilkan hasil sertifikat jika berhasil
